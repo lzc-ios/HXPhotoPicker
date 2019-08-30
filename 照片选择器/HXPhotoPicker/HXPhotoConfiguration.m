@@ -28,9 +28,9 @@
     self.statusBarStyle = UIStatusBarStyleLightContent;
     self.selectTogether = NO;
     self.isWXStyle = YES;//默认微信
-    self.themeColor = [UIColor whiteColor];
-    self.navBarBackgroudColor = [UIColor blackColor];
-    self.navigationTitleColor = [UIColor whiteColor];
+    //self.themeColor = [UIColor whiteColor];
+    self.navBarBackgroudColor = [UIColor whiteColor];
+    self.navigationTitleColor = [UIColor blackColor];
     self.maxNum = 10;
     self.photoMaxNum = 9;
     self.videoMaxNum = 1;

@@ -10,7 +10,7 @@
 #import "UIImage+HXExtension.h"
 #import "HXPhoto3DTouchViewController.h"
 #import "HXPhotoPreviewViewController.h"
-#import "UIButton+HXExtension.h" 
+#import "UIButton+HXExtension.h"
 #import "HXCustomCameraViewController.h"
 #import "HXCustomNavigationController.h"
 #import "HXCustomCameraController.h"
@@ -29,7 +29,7 @@
 #import "UIImageView+WebCache.h"
 #endif
 
-#import "HXAlbumlistView.h" 
+#import "HXAlbumlistView.h"
 #import "NSArray+HXExtension.h"
 #import "HXVideoEditViewController.h"
 
@@ -94,6 +94,10 @@ HXVideoEditViewControllerDelegate
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
 }
 - (UIStatusBarStyle)preferredStatusBarStyle {
+    if (self.manager.configuration.isWXStyle) {
+        return UIStatusBarStyleLightContent;
+    }
+    
     return self.manager.configuration.statusBarStyle;
 }
 - (BOOL)prefersStatusBarHidden {
@@ -102,11 +106,11 @@ HXVideoEditViewControllerDelegate
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [UINavigationBar appearance].translucent = YES;
-    [[UIApplication sharedApplication] setStatusBarStyle:self.manager.configuration.statusBarStyle];
+    [[UIApplication sharedApplication] setStatusBarStyle:self.manager.configuration.isWXStyle?UIStatusBarStyleLightContent:self.manager.configuration.statusBarStyle];
     if (self.needChangeViewFrame) {
         self.needChangeViewFrame = NO;
     }
-} 
+}
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     if (self.orientationDidChange) {
@@ -126,7 +130,7 @@ HXVideoEditViewControllerDelegate
         [self changeSubviewFrame];
         [self.view hx_showLoadingHUDText:nil];
         [self getPhotoList];
-    }else if (self.manager.configuration.albumShowMode == HXPhotoAlbumShowModePopup) { 
+    }else if (self.manager.configuration.albumShowMode == HXPhotoAlbumShowModePopup) {
         [self setupUI];
         [self changeSubviewFrame];
         // 获取当前应用对照片的访问授权状态
@@ -146,6 +150,8 @@ HXVideoEditViewControllerDelegate
 }
 #pragma mark - < private >
 - (void)setupUI {
+    
+    
     self.currentSectionIndex = 0;
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:[NSBundle hx_localizedStringForKey:@"取消"] style:UIBarButtonItemStyleDone target:self action:@selector(didCancelClick)];
     self.view.backgroundColor = [UIColor whiteColor];
@@ -161,11 +167,15 @@ HXVideoEditViewControllerDelegate
         
     }
     [self.navigationController.navigationBar setTintColor:self.manager.configuration.themeColor];
+    
     if (self.manager.configuration.navBarBackgroudColor) {
         [self.navigationController.navigationBar setBackgroundColor:nil];
         [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
         self.navigationController.navigationBar.barTintColor = self.manager.configuration.navBarBackgroudColor;
     }
+    
+   
+    
 }
 - (void)deviceOrientationChanged:(NSNotification *)notify {
     self.beforeOrientationIndexPath = [self.collectionView indexPathsForVisibleItems].firstObject;
@@ -774,7 +784,7 @@ HXVideoEditViewControllerDelegate
                 }else {
                     hx_showAlert(weakSelf, [NSBundle hx_localizedStringForKey:@"无法使用相机"], [NSBundle hx_localizedStringForKey:@"请在设置-隐私-相机中允许访问相机"], [NSBundle hx_localizedStringForKey:@"取消"], [NSBundle hx_localizedStringForKey:@"设置"] , nil, ^{
                         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
-                    }); 
+                    });
                 }
             });
         }];
@@ -889,7 +899,7 @@ HXVideoEditViewControllerDelegate
     }else {
         return self.manager.configuration.showBottomPhotoDetail ? CGSizeMake(self.view.hx_w, 50) : CGSizeZero;
     }
-} 
+}
 - (UIViewController *)previewingContext:(id<UIViewControllerPreviewing>)previewingContext viewControllerForLocation:(CGPoint)location {
     NSIndexPath *indexPath = [self.collectionView indexPathForItemAtPoint:location];
     if (!indexPath) {
@@ -1054,9 +1064,9 @@ HXVideoEditViewControllerDelegate
             }
             index++;
         }
-//        if (indexPathList.count > 0) {
-//            [self.collectionView reloadItemsAtIndexPaths:indexPathList];
-//        }
+        //        if (indexPathList.count > 0) {
+        //            [self.collectionView reloadItemsAtIndexPaths:indexPathList];
+        //        }
     }
     
     if (self.manager.videoSelectedType == HXPhotoManagerVideoSelectedTypeSingle) {
@@ -1148,7 +1158,7 @@ HXVideoEditViewControllerDelegate
     [self photoPreviewControllerDidSelect:nil model:beforeModel];
     [self collectionViewAddModel:model beforeModel:beforeModel];
     
-//    [self photoBottomViewDidDoneBtn];
+    //    [self photoBottomViewDidDoneBtn];
 }
 - (void)photoPreviewSingleSelectedClick:(HXPhotoPreviewViewController *)previewController model:(HXPhotoModel *)model {
     [self.manager beforeSelectedListAddPhotoModel:model];
@@ -1164,7 +1174,7 @@ HXVideoEditViewControllerDelegate
     [self.manager beforeSelectedListdeletePhotoModel:beforeModel];
     
     [self photoPreviewControllerDidSelect:nil model:beforeModel];
-//    [self customCameraViewController:nil didDone:afterModel];
+    //    [self customCameraViewController:nil didDone:afterModel];
     
     afterModel.currentAlbumIndex = self.albumModel.index;
     afterModel.clarityScale = self.manager.configuration.clarityScale;
@@ -1247,7 +1257,7 @@ HXVideoEditViewControllerDelegate
             vc.model = self.manager.selectedPhotoArray.firstObject;
             vc.delegate = self;
             vc.manager = self.manager;
-            [self presentViewController:vc animated:YES completion:nil]; 
+            [self presentViewController:vc animated:YES completion:nil];
         }
     }else if (model.subType == HXPhotoModelMediaSubTypeVideo) {
         if (self.manager.configuration.replaceVideoEditViewController) {
@@ -1288,14 +1298,14 @@ HXVideoEditViewControllerDelegate
     }
     if ([self.delegate respondsToSelector:@selector(photoViewController:didDoneAllList:photos:videos:original:)]) {
         [self.delegate photoViewController:self
-                                didDoneAllList:allList
-                                        photos:photoList
-                                        videos:videoList
-                                      original:isOriginal];
+                            didDoneAllList:allList
+                                    photos:photoList
+                                    videos:videoList
+                                  original:isOriginal];
     }
     if (self.doneBlock) {
         self.doneBlock(allList, photoList, videoList, isOriginal, self, self.manager);
-    } 
+    }
 }
 #pragma mark - < 懒加载 >
 - (UILabel *)authorizationLb {
@@ -1430,1191 +1440,1191 @@ HXVideoEditViewControllerDelegate
             }
             _collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
 #else
-        if ((NO)) {
+            if ((NO)) {
 #endif
-        } else {
-            if ([self hx_navigationBarWhetherSetupBackground]) {
-                self.navigationController.navigationBar.translucent = YES;
-            }
-            self.automaticallyAdjustsScrollViewInsets = NO;
-        }
-        if (self.manager.configuration.open3DTouchPreview) {
-            if ([self respondsToSelector:@selector(traitCollection)]) {
-                if ([self.traitCollection respondsToSelector:@selector(forceTouchCapability)]) {
-                    if (self.traitCollection.forceTouchCapability == UIForceTouchCapabilityAvailable) {
-                        self.previewingContext = [self registerForPreviewingWithDelegate:self sourceView:_collectionView];
-                    }
+            } else {
+                if ([self hx_navigationBarWhetherSetupBackground]) {
+                    self.navigationController.navigationBar.translucent = YES;
                 }
+                self.automaticallyAdjustsScrollViewInsets = NO;
             }
-        }
-    }
-    return _collectionView;
-}
-- (UICollectionViewFlowLayout *)flowLayout {
-    if (!_flowLayout) {
-        _flowLayout = [[UICollectionViewFlowLayout alloc] init];
-        _flowLayout.minimumLineSpacing = 1;
-        _flowLayout.minimumInteritemSpacing = 1;
-        _flowLayout.sectionInset = UIEdgeInsetsMake(0.5, 0, 0.5, 0);
-        //        if (HX_IOS9Later) {
-        //            _flowLayout.sectionHeadersPinToVisibleBounds = YES;
-        //        }
-    }
-    return _flowLayout;
-}
-- (NSMutableArray *)allArray {
-    if (!_allArray) {
-        _allArray = [NSMutableArray array];
-    }
-    return _allArray;
-}
-- (NSMutableArray *)photoArray {
-    if (!_photoArray) {
-        _photoArray = [NSMutableArray array];
-    }
-    return _photoArray;
-}
-- (NSMutableArray *)videoArray {
-    if (!_videoArray) {
-        _videoArray = [NSMutableArray array];
-    }
-    return _videoArray;
-}
-- (NSMutableArray *)previewArray {
-    if (!_previewArray) {
-        _previewArray = [NSMutableArray array];
-    }
-    return _previewArray;
-}
-- (NSMutableArray *)dateArray {
-    if (!_dateArray) {
-        _dateArray = [NSMutableArray array];
-    }
-    return _dateArray;
-}
-@end
-@interface HXPhotoCameraViewCell ()
-@property (strong, nonatomic) UIButton *cameraBtn;
-@property (strong, nonatomic) HXCustomCameraController *cameraController;
-@property (strong, nonatomic) HXCustomPreviewView *previewView;
-@property (strong, nonatomic) UIVisualEffectView *effectView;
-@end
-
-@implementation HXPhotoCameraViewCell
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (self) {
-        [self setupUI];
-    }
-    return self;
-}
-- (void)setupUI  {
-    [self.contentView addSubview:self.previewView];
-    [self.contentView addSubview:self.cameraBtn];
-}
-- (void)starRunning {
-    if (![UIImagePickerController isSourceTypeAvailable:
-          UIImagePickerControllerSourceTypeCamera]) {
-        return;
-    }
-    if (self.cameraController.captureSession) {
-        return;
-    }
-    HXWeakSelf
-    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (granted) {
-                if ([weakSelf.cameraController setupSession:nil]) {
-                    if (weakSelf.tempCameraPreviewView) {
-                        weakSelf.cameraBtn.selected = YES;
-                        [weakSelf.previewView addSubview:weakSelf.tempCameraPreviewView];
-                        [weakSelf.previewView addSubview:weakSelf.effectView];
-                    }
-                    [weakSelf.previewView setSession:weakSelf.cameraController.captureSession];
-                    [weakSelf.cameraController startSessionComplete:^{
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            weakSelf.cameraBtn.selected = YES;
-                            if (weakSelf.tempCameraPreviewView) {
-                                [UIView animateWithDuration:0.3 animations:^{
-                                    weakSelf.tempCameraPreviewView.alpha = 0;
-                                    weakSelf.effectView.effect = nil;
-                                } completion:^(BOOL finished) {
-                                    [weakSelf.tempCameraPreviewView removeFromSuperview];
-                                    [weakSelf.effectView removeFromSuperview];
-                                }];
-                            }
-                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                                if (weakSelf.stopRunningComplete) {
-                                    weakSelf.stopRunningComplete([weakSelf.previewView snapshotViewAfterScreenUpdates:YES]);
-                                }
-                            });
-                        });
-                    }];
-                }
-            }
-        });
-    }];
-}
-- (void)stopRunning {
-    if (![UIImagePickerController isSourceTypeAvailable:
-          UIImagePickerControllerSourceTypeCamera]) {
-        return;
-    }
-    AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    if (authStatus != AVAuthorizationStatusAuthorized) {
-        return;
-    }
-    if (!self.cameraController.captureSession) {
-        return;
-    }
-    [self.cameraController stopSession];
-    self.cameraBtn.selected = NO;
-}
-- (void)setModel:(HXPhotoModel *)model {
-    _model = model;
-    if (!model.thumbPhoto) {
-        model.thumbPhoto = [UIImage hx_imageNamed:model.cameraNormalImageNamed];
-    }
-    if (!model.previewPhoto) {
-        model.previewPhoto = [UIImage hx_imageNamed:model.cameraPreviewImageNamed];
-    }
-    [self.cameraBtn setImage:model.thumbPhoto forState:UIControlStateNormal];
-    [self.cameraBtn setImage:model.previewPhoto forState:UIControlStateSelected];
-}
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    self.cameraBtn.frame = self.bounds;
-    self.previewView.frame = self.bounds;
-    self.effectView.frame = self.bounds;
-    self.tempCameraPreviewView.frame = self.bounds;
-}
-- (void)dealloc {
-    [self stopRunning];
-    if (HXShowLog) NSSLog(@"camera - dealloc");
-}
-- (UIButton *)cameraBtn {
-    if (!_cameraBtn) {
-        _cameraBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        _cameraBtn.userInteractionEnabled = NO;
-    }
-    return _cameraBtn;
-}
-- (HXCustomCameraController *)cameraController {
-    if (!_cameraController) {
-        _cameraController = [[HXCustomCameraController alloc] init];
-    }
-    return _cameraController;
-}
-- (HXCustomPreviewView *)previewView {
-    if (!_previewView) {
-        _previewView = [[HXCustomPreviewView alloc] init];
-        _previewView.pinchToZoomEnabled = NO;
-        _previewView.tapToFocusEnabled = NO;
-        _previewView.tapToExposeEnabled = NO;
-    }
-    return _previewView;
-}
-- (UIVisualEffectView *)effectView {
-    if (!_effectView) {
-        UIBlurEffect *effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
-        _effectView = [[UIVisualEffectView alloc] initWithEffect:effect];
-    }
-    return _effectView;
-}
-@end
-@interface HXPhotoViewCell ()
-@property (strong, nonatomic) UIImageView *imageView;
-@property (strong, nonatomic) UIView *maskView;
-@property (copy, nonatomic) NSString *localIdentifier;
-@property (assign, nonatomic) PHImageRequestID requestID;
-@property (assign, nonatomic) PHImageRequestID iCloudRequestID;
-@property (strong, nonatomic) UILabel *stateLb;
-@property (strong, nonatomic) CAGradientLayer *bottomMaskLayer;
-@property (strong, nonatomic) UIButton *selectBtn;
-@property (strong, nonatomic) UIImageView *iCloudIcon;
-@property (strong, nonatomic) CALayer *iCloudMaskLayer;
-@property (strong, nonatomic) HXDownloadProgressView *downloadView;
-@property (strong, nonatomic) HXCircleProgressView *progressView;
-@property (strong, nonatomic) CALayer *videoMaskLayer;
-@property (strong, nonatomic) UIView *highlightMaskView;
-@end
-
-@implementation HXPhotoViewCell
-
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (self) {
-        [self setupUI];
-    }
-    return self;
-}
-- (void)setupUI {
-    [self.contentView addSubview:self.imageView];
-    [self.contentView addSubview:self.maskView];
-    [self.contentView addSubview:self.downloadView];
-    [self.contentView addSubview:self.progressView];
-    [self.contentView addSubview:self.highlightMaskView];
-}
-- (void)bottomViewPrepareAnimation {
-    self.maskView.alpha = 0;
-}
-- (void)bottomViewStartAnimation {
-    [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
-        self.maskView.alpha = 1;
-    } completion:nil];
-}
-- (void)setSingleSelected:(BOOL)singleSelected {
-    _singleSelected = singleSelected;
-    if (singleSelected) {
-        [self.selectBtn removeFromSuperview];
-    }
-}
-- (void)resetNetworkImage {
-    if (self.model.networkPhotoUrl &&
-        self.model.type == HXPhotoModelMediaTypeCameraPhoto) {
-        self.model.loadOriginalImage = YES;
-        HXWeakSelf
-        [self.imageView hx_setImageWithModel:self.model original:YES progress:nil completed:^(UIImage *image, NSError *error, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                weakSelf.imageView.image = image;
-            }
-        }];
-    }
-}
-- (void)setModel:(HXPhotoModel *)model {
-    _model = model;
-    self.progressView.hidden = YES;
-    self.progressView.progress = 0;
-    HXWeakSelf
-    if (model.type == HXPhotoModelMediaTypeCamera ||
-        model.type == HXPhotoModelMediaTypeCameraPhoto ||
-        model.type == HXPhotoModelMediaTypeCameraVideo) {
-        if (self.maskView.hidden) {
-            self.imageView.hidden = NO;
-            self.imageView.alpha = 1;
-            self.maskView.hidden = NO;
-            self.maskView.alpha = 1;
-        }
-        if (model.networkPhotoUrl) {
-            self.progressView.hidden = model.downloadComplete;
-            CGFloat progress = (CGFloat)model.receivedSize / model.expectedSize;
-            self.progressView.progress = progress;
-            self.imageView.image = nil;
-            [self.imageView hx_setImageWithModel:model original:NO progress:^(CGFloat progress, HXPhotoModel *model) {
-                if (weakSelf.model == model) {
-                    weakSelf.progressView.progress = progress;
-                }
-            } completed:^(UIImage *image, NSError *error, HXPhotoModel *model) {
-                if (weakSelf.model == model) {
-                    if (error != nil) {
-                        [weakSelf.progressView showError];
-                    }else {
-                        if (image) {
-                            weakSelf.imageView.image = image;
-                            weakSelf.progressView.progress = 1;
-                            weakSelf.progressView.hidden = YES;
+            if (self.manager.configuration.open3DTouchPreview) {
+                if ([self respondsToSelector:@selector(traitCollection)]) {
+                    if ([self.traitCollection respondsToSelector:@selector(forceTouchCapability)]) {
+                        if (self.traitCollection.forceTouchCapability == UIForceTouchCapabilityAvailable) {
+                            self.previewingContext = [self registerForPreviewingWithDelegate:self sourceView:_collectionView];
                         }
                     }
                 }
-            }]; 
-        }else {
-            self.imageView.image = model.thumbPhoto;
-        }
-    }else {
-        self.imageView.image = nil;
-        self.requestID = [self.model requestThumbImageCompletion:^(UIImage *image, HXPhotoModel *model, NSDictionary *info) {
-            if (weakSelf.model == model) {
-                weakSelf.imageView.image = image;
-                if (weakSelf.maskView.hidden) {
-                    weakSelf.imageView.hidden = NO;
-                    weakSelf.maskView.hidden = NO;
-                    [UIView animateWithDuration:0.05 animations:^{
-                        weakSelf.maskView.alpha = 1;
-                        weakSelf.imageView.alpha = 1; 
-                    }];
-                }
             }
+        }
+        return _collectionView;
+    }
+    - (UICollectionViewFlowLayout *)flowLayout {
+        if (!_flowLayout) {
+            _flowLayout = [[UICollectionViewFlowLayout alloc] init];
+            _flowLayout.minimumLineSpacing = 1;
+            _flowLayout.minimumInteritemSpacing = 1;
+            _flowLayout.sectionInset = UIEdgeInsetsMake(0.5, 0, 0.5, 0);
+            //        if (HX_IOS9Later) {
+            //            _flowLayout.sectionHeadersPinToVisibleBounds = YES;
+            //        }
+        }
+        return _flowLayout;
+    }
+    - (NSMutableArray *)allArray {
+        if (!_allArray) {
+            _allArray = [NSMutableArray array];
+        }
+        return _allArray;
+    }
+    - (NSMutableArray *)photoArray {
+        if (!_photoArray) {
+            _photoArray = [NSMutableArray array];
+        }
+        return _photoArray;
+    }
+    - (NSMutableArray *)videoArray {
+        if (!_videoArray) {
+            _videoArray = [NSMutableArray array];
+        }
+        return _videoArray;
+    }
+    - (NSMutableArray *)previewArray {
+        if (!_previewArray) {
+            _previewArray = [NSMutableArray array];
+        }
+        return _previewArray;
+    }
+    - (NSMutableArray *)dateArray {
+        if (!_dateArray) {
+            _dateArray = [NSMutableArray array];
+        }
+        return _dateArray;
+    }
+    @end
+    @interface HXPhotoCameraViewCell ()
+    @property (strong, nonatomic) UIButton *cameraBtn;
+    @property (strong, nonatomic) HXCustomCameraController *cameraController;
+    @property (strong, nonatomic) HXCustomPreviewView *previewView;
+    @property (strong, nonatomic) UIVisualEffectView *effectView;
+    @end
+    
+    @implementation HXPhotoCameraViewCell
+    - (instancetype)initWithFrame:(CGRect)frame {
+        self = [super initWithFrame:frame];
+        if (self) {
+            [self setupUI];
+        }
+        return self;
+    }
+    - (void)setupUI  {
+        [self.contentView addSubview:self.previewView];
+        [self.contentView addSubview:self.cameraBtn];
+    }
+    - (void)starRunning {
+        if (![UIImagePickerController isSourceTypeAvailable:
+              UIImagePickerControllerSourceTypeCamera]) {
+            return;
+        }
+        if (self.cameraController.captureSession) {
+            return;
+        }
+        HXWeakSelf
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (granted) {
+                    if ([weakSelf.cameraController setupSession:nil]) {
+                        if (weakSelf.tempCameraPreviewView) {
+                            weakSelf.cameraBtn.selected = YES;
+                            [weakSelf.previewView addSubview:weakSelf.tempCameraPreviewView];
+                            [weakSelf.previewView addSubview:weakSelf.effectView];
+                        }
+                        [weakSelf.previewView setSession:weakSelf.cameraController.captureSession];
+                        [weakSelf.cameraController startSessionComplete:^{
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                weakSelf.cameraBtn.selected = YES;
+                                if (weakSelf.tempCameraPreviewView) {
+                                    [UIView animateWithDuration:0.3 animations:^{
+                                        weakSelf.tempCameraPreviewView.alpha = 0;
+                                        weakSelf.effectView.effect = nil;
+                                    } completion:^(BOOL finished) {
+                                        [weakSelf.tempCameraPreviewView removeFromSuperview];
+                                        [weakSelf.effectView removeFromSuperview];
+                                    }];
+                                }
+                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                    if (weakSelf.stopRunningComplete) {
+                                        weakSelf.stopRunningComplete([weakSelf.previewView snapshotViewAfterScreenUpdates:YES]);
+                                    }
+                                });
+                            });
+                        }];
+                    }
+                }
+            });
         }];
     }
-    if (model.type == HXPhotoModelMediaTypePhotoGif) {
-        self.stateLb.text = @"GIF";
-        self.stateLb.hidden = NO;
-        self.bottomMaskLayer.hidden = NO;
-    }else if (model.type == HXPhotoModelMediaTypeLivePhoto) {
-        self.stateLb.text = @"Live";
-        self.stateLb.hidden = NO;
-        self.bottomMaskLayer.hidden = NO;
-    }else {
-        if (model.subType == HXPhotoModelMediaSubTypeVideo) {
-            self.stateLb.text = model.videoTime;
+    - (void)stopRunning {
+        if (![UIImagePickerController isSourceTypeAvailable:
+              UIImagePickerControllerSourceTypeCamera]) {
+            return;
+        }
+        AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+        if (authStatus != AVAuthorizationStatusAuthorized) {
+            return;
+        }
+        if (!self.cameraController.captureSession) {
+            return;
+        }
+        [self.cameraController stopSession];
+        self.cameraBtn.selected = NO;
+    }
+    - (void)setModel:(HXPhotoModel *)model {
+        _model = model;
+        if (!model.thumbPhoto) {
+            model.thumbPhoto = [UIImage hx_imageNamed:model.cameraNormalImageNamed];
+        }
+        if (!model.previewPhoto) {
+            model.previewPhoto = [UIImage hx_imageNamed:model.cameraPreviewImageNamed];
+        }
+        [self.cameraBtn setImage:model.thumbPhoto forState:UIControlStateNormal];
+        [self.cameraBtn setImage:model.previewPhoto forState:UIControlStateSelected];
+    }
+    - (void)layoutSubviews {
+        [super layoutSubviews];
+        self.cameraBtn.frame = self.bounds;
+        self.previewView.frame = self.bounds;
+        self.effectView.frame = self.bounds;
+        self.tempCameraPreviewView.frame = self.bounds;
+    }
+    - (void)dealloc {
+        [self stopRunning];
+        if (HXShowLog) NSSLog(@"camera - dealloc");
+    }
+    - (UIButton *)cameraBtn {
+        if (!_cameraBtn) {
+            _cameraBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+            _cameraBtn.userInteractionEnabled = NO;
+        }
+        return _cameraBtn;
+    }
+    - (HXCustomCameraController *)cameraController {
+        if (!_cameraController) {
+            _cameraController = [[HXCustomCameraController alloc] init];
+        }
+        return _cameraController;
+    }
+    - (HXCustomPreviewView *)previewView {
+        if (!_previewView) {
+            _previewView = [[HXCustomPreviewView alloc] init];
+            _previewView.pinchToZoomEnabled = NO;
+            _previewView.tapToFocusEnabled = NO;
+            _previewView.tapToExposeEnabled = NO;
+        }
+        return _previewView;
+    }
+    - (UIVisualEffectView *)effectView {
+        if (!_effectView) {
+            UIBlurEffect *effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+            _effectView = [[UIVisualEffectView alloc] initWithEffect:effect];
+        }
+        return _effectView;
+    }
+    @end
+    @interface HXPhotoViewCell ()
+    @property (strong, nonatomic) UIImageView *imageView;
+    @property (strong, nonatomic) UIView *maskView;
+    @property (copy, nonatomic) NSString *localIdentifier;
+    @property (assign, nonatomic) PHImageRequestID requestID;
+    @property (assign, nonatomic) PHImageRequestID iCloudRequestID;
+    @property (strong, nonatomic) UILabel *stateLb;
+    @property (strong, nonatomic) CAGradientLayer *bottomMaskLayer;
+    @property (strong, nonatomic) UIButton *selectBtn;
+    @property (strong, nonatomic) UIImageView *iCloudIcon;
+    @property (strong, nonatomic) CALayer *iCloudMaskLayer;
+    @property (strong, nonatomic) HXDownloadProgressView *downloadView;
+    @property (strong, nonatomic) HXCircleProgressView *progressView;
+    @property (strong, nonatomic) CALayer *videoMaskLayer;
+    @property (strong, nonatomic) UIView *highlightMaskView;
+    @end
+    
+    @implementation HXPhotoViewCell
+    
+    - (instancetype)initWithFrame:(CGRect)frame {
+        self = [super initWithFrame:frame];
+        if (self) {
+            [self setupUI];
+        }
+        return self;
+    }
+    - (void)setupUI {
+        [self.contentView addSubview:self.imageView];
+        [self.contentView addSubview:self.maskView];
+        [self.contentView addSubview:self.downloadView];
+        [self.contentView addSubview:self.progressView];
+        [self.contentView addSubview:self.highlightMaskView];
+    }
+    - (void)bottomViewPrepareAnimation {
+        self.maskView.alpha = 0;
+    }
+    - (void)bottomViewStartAnimation {
+        [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
+            self.maskView.alpha = 1;
+        } completion:nil];
+    }
+    - (void)setSingleSelected:(BOOL)singleSelected {
+        _singleSelected = singleSelected;
+        if (singleSelected) {
+            [self.selectBtn removeFromSuperview];
+        }
+    }
+    - (void)resetNetworkImage {
+        if (self.model.networkPhotoUrl &&
+            self.model.type == HXPhotoModelMediaTypeCameraPhoto) {
+            self.model.loadOriginalImage = YES;
+            HXWeakSelf
+            [self.imageView hx_setImageWithModel:self.model original:YES progress:nil completed:^(UIImage *image, NSError *error, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    weakSelf.imageView.image = image;
+                }
+            }];
+        }
+    }
+    - (void)setModel:(HXPhotoModel *)model {
+        _model = model;
+        self.progressView.hidden = YES;
+        self.progressView.progress = 0;
+        HXWeakSelf
+        if (model.type == HXPhotoModelMediaTypeCamera ||
+            model.type == HXPhotoModelMediaTypeCameraPhoto ||
+            model.type == HXPhotoModelMediaTypeCameraVideo) {
+            if (self.maskView.hidden) {
+                self.imageView.hidden = NO;
+                self.imageView.alpha = 1;
+                self.maskView.hidden = NO;
+                self.maskView.alpha = 1;
+            }
+            if (model.networkPhotoUrl) {
+                self.progressView.hidden = model.downloadComplete;
+                CGFloat progress = (CGFloat)model.receivedSize / model.expectedSize;
+                self.progressView.progress = progress;
+                self.imageView.image = nil;
+                [self.imageView hx_setImageWithModel:model original:NO progress:^(CGFloat progress, HXPhotoModel *model) {
+                    if (weakSelf.model == model) {
+                        weakSelf.progressView.progress = progress;
+                    }
+                } completed:^(UIImage *image, NSError *error, HXPhotoModel *model) {
+                    if (weakSelf.model == model) {
+                        if (error != nil) {
+                            [weakSelf.progressView showError];
+                        }else {
+                            if (image) {
+                                weakSelf.imageView.image = image;
+                                weakSelf.progressView.progress = 1;
+                                weakSelf.progressView.hidden = YES;
+                            }
+                        }
+                    }
+                }];
+            }else {
+                self.imageView.image = model.thumbPhoto;
+            }
+        }else {
+            self.imageView.image = nil;
+            self.requestID = [self.model requestThumbImageCompletion:^(UIImage *image, HXPhotoModel *model, NSDictionary *info) {
+                if (weakSelf.model == model) {
+                    weakSelf.imageView.image = image;
+                    if (weakSelf.maskView.hidden) {
+                        weakSelf.imageView.hidden = NO;
+                        weakSelf.maskView.hidden = NO;
+                        [UIView animateWithDuration:0.05 animations:^{
+                            weakSelf.maskView.alpha = 1;
+                            weakSelf.imageView.alpha = 1;
+                        }];
+                    }
+                }
+            }];
+        }
+        if (model.type == HXPhotoModelMediaTypePhotoGif) {
+            self.stateLb.text = @"GIF";
+            self.stateLb.hidden = NO;
+            self.bottomMaskLayer.hidden = NO;
+        }else if (model.type == HXPhotoModelMediaTypeLivePhoto) {
+            self.stateLb.text = @"Live";
             self.stateLb.hidden = NO;
             self.bottomMaskLayer.hidden = NO;
         }else {
-            if (model.cameraPhotoType == HXPhotoModelMediaTypeCameraPhotoTypeNetWorkGif) {
-                self.stateLb.text = @"GIF";
+            if (model.subType == HXPhotoModelMediaSubTypeVideo) {
+                self.stateLb.text = model.videoTime;
                 self.stateLb.hidden = NO;
                 self.bottomMaskLayer.hidden = NO;
             }else {
-                self.stateLb.hidden = YES;
-                self.bottomMaskLayer.hidden = YES;
-            } 
+                if (model.cameraPhotoType == HXPhotoModelMediaTypeCameraPhotoTypeNetWorkGif) {
+                    self.stateLb.text = @"GIF";
+                    self.stateLb.hidden = NO;
+                    self.bottomMaskLayer.hidden = NO;
+                }else {
+                    self.stateLb.hidden = YES;
+                    self.bottomMaskLayer.hidden = YES;
+                }
+            }
         }
-    }
-    self.selectMaskLayer.hidden = !model.selected;
-    self.selectBtn.selected = model.selected;
-    [self.selectBtn setTitle:model.selectIndexStr forState:UIControlStateSelected];
-    self.selectBtn.backgroundColor = model.selected ? self.selectBgColor :nil;
-    
-    self.iCloudIcon.hidden = !model.isICloud;
-    self.iCloudMaskLayer.hidden = !model.isICloud;
-    
-    // 当前是否需要隐藏选择按钮
-    if (model.needHideSelectBtn) {
-        self.selectBtn.hidden = YES;
-        self.selectBtn.userInteractionEnabled = NO;
-    }else {
-        self.selectBtn.hidden = model.isICloud;
-        self.selectBtn.userInteractionEnabled = !model.isICloud;
-    }
-    
-    if (model.isICloud) {
-        self.videoMaskLayer.hidden = YES;
-        self.userInteractionEnabled = YES;
-    }else {
+        self.selectMaskLayer.hidden = !model.selected;
+        self.selectBtn.selected = model.selected;
+        [self.selectBtn setTitle:model.selectIndexStr forState:UIControlStateSelected];
+        self.selectBtn.backgroundColor = model.selected ? self.selectBgColor :nil;
+        
+        self.iCloudIcon.hidden = !model.isICloud;
+        self.iCloudMaskLayer.hidden = !model.isICloud;
+        
         // 当前是否需要隐藏选择按钮
         if (model.needHideSelectBtn) {
-            // 当前视频是否不可选
-            self.videoMaskLayer.hidden = !model.videoUnableSelect;
+            self.selectBtn.hidden = YES;
+            self.selectBtn.userInteractionEnabled = NO;
         }else {
+            self.selectBtn.hidden = model.isICloud;
+            self.selectBtn.userInteractionEnabled = !model.isICloud;
+        }
+        
+        if (model.isICloud) {
             self.videoMaskLayer.hidden = YES;
             self.userInteractionEnabled = YES;
-        }
-    }
-    
-    if (model.iCloudDownloading) {
-        if (model.isICloud) {
-            self.downloadView.progress = model.iCloudProgress;
-            [self startRequestICloudAsset];
         }else {
-            model.iCloudDownloading = NO;
+            // 当前是否需要隐藏选择按钮
+            if (model.needHideSelectBtn) {
+                // 当前视频是否不可选
+                self.videoMaskLayer.hidden = !model.videoUnableSelect;
+            }else {
+                self.videoMaskLayer.hidden = YES;
+                self.userInteractionEnabled = YES;
+            }
+        }
+        
+        if (model.iCloudDownloading) {
+            if (model.isICloud) {
+                self.downloadView.progress = model.iCloudProgress;
+                [self startRequestICloudAsset];
+            }else {
+                model.iCloudDownloading = NO;
+                self.downloadView.hidden = YES;
+            }
+        }else {
             self.downloadView.hidden = YES;
         }
-    }else {
-        self.downloadView.hidden = YES;
     }
-}
-- (void)setSelectBgColor:(UIColor *)selectBgColor {
-    _selectBgColor = selectBgColor;
-    if ([selectBgColor isEqual:[UIColor whiteColor]] && !self.selectedTitleColor) {
-        [self.selectBtn setTitleColor:[UIColor blackColor] forState:UIControlStateSelected];
-    }
-}
-- (void)setSelectedTitleColor:(UIColor *)selectedTitleColor {
-    _selectedTitleColor = selectedTitleColor;
-    [self.selectBtn setTitleColor:selectedTitleColor forState:UIControlStateSelected];
-}
-- (void)startRequestICloudAsset {
-    self.downloadView.hidden = NO;
-    [self.downloadView startAnima];
-    self.iCloudIcon.hidden = YES;
-    self.iCloudMaskLayer.hidden = YES;
-    HXWeakSelf
-    if (self.model.type == HXPhotoModelMediaTypeVideo) {
-        self.iCloudRequestID = [self.model requestAVAssetStartRequestICloud:^(PHImageRequestID iCloudRequestId, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                weakSelf.downloadView.hidden = NO;
-                weakSelf.iCloudRequestID = iCloudRequestId;
-            }
-        } progressHandler:^(double progress, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                weakSelf.downloadView.hidden = NO;
-                weakSelf.downloadView.progress = progress;
-            }
-        } success:^(AVAsset *avAsset, AVAudioMix *audioMix, HXPhotoModel *model, NSDictionary *info) {
-            if (weakSelf.model == model) {
-                weakSelf.model.isICloud = NO;
-                weakSelf.downloadView.progress = 1;
-                if ([weakSelf.delegate respondsToSelector:@selector(photoViewCellRequestICloudAssetComplete:)]) {
-                    [weakSelf.delegate photoViewCellRequestICloudAssetComplete:weakSelf];
-                }
-            }
-        } failed:^(NSDictionary *info, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                [weakSelf downloadError:info];
-            }
-        }];
-    }else if (self.model.type == HXPhotoModelMediaTypeLivePhoto){
-        self.iCloudRequestID = [self.model requestLivePhotoWithSize:CGSizeMake(self.model.previewViewSize.width * 1.5, self.model.previewViewSize.height * 1.5) startRequestICloud:^(PHImageRequestID iCloudRequestId, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                weakSelf.downloadView.hidden = NO;
-                weakSelf.iCloudRequestID = iCloudRequestId;
-            }
-        } progressHandler:^(double progress, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                weakSelf.downloadView.hidden = NO;
-                weakSelf.downloadView.progress = progress;
-            }
-        } success:^(PHLivePhoto *livePhoto, HXPhotoModel *model, NSDictionary *info) {
-            if (weakSelf.model == model) {
-                weakSelf.model.isICloud = NO;
-                weakSelf.downloadView.progress = 1;
-                if ([weakSelf.delegate respondsToSelector:@selector(photoViewCellRequestICloudAssetComplete:)]) {
-                    [weakSelf.delegate photoViewCellRequestICloudAssetComplete:weakSelf];
-                }
-            }
-        } failed:^(NSDictionary *info, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                [weakSelf downloadError:info];
-            }
-        }];
-    }else {
-        self.iCloudRequestID = [self.model requestImageDataStartRequestICloud:^(PHImageRequestID iCloudRequestId, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                weakSelf.downloadView.hidden = NO;
-                weakSelf.iCloudRequestID = iCloudRequestId;
-            }
-        } progressHandler:^(double progress, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                weakSelf.downloadView.hidden = NO;
-                weakSelf.downloadView.progress = progress;
-            }
-        } success:^(NSData *imageData, UIImageOrientation orientation, HXPhotoModel *model, NSDictionary *info) {
-            if (weakSelf.model == model) {
-                weakSelf.model.isICloud = NO;
-                weakSelf.downloadView.progress = 1;
-                if ([weakSelf.delegate respondsToSelector:@selector(photoViewCellRequestICloudAssetComplete:)]) {
-                    [weakSelf.delegate photoViewCellRequestICloudAssetComplete:weakSelf];
-                }
-            }
-        } failed:^(NSDictionary *info, HXPhotoModel *model) {
-            if (weakSelf.model == model) {
-                [weakSelf downloadError:info];
-            }
-        }];
-    }
-}
-- (void)downloadError:(NSDictionary *)info {
-    if (![[info objectForKey:PHImageCancelledKey] boolValue]) {
-        [[self hx_viewController].view hx_showImageHUDText:[NSBundle hx_localizedStringForKey:@"下载失败，请重试！"]];
-    }
-    self.downloadView.hidden = YES;
-    [self.downloadView resetState];
-    self.iCloudIcon.hidden = !self.model.isICloud;
-    self.iCloudMaskLayer.hidden = !self.model.isICloud;
-}
-- (void)cancelRequest {
-#if HasYYWebImage
-    [self.imageView yy_cancelCurrentImageRequest];
-#elif HasYYKit
-    [self.imageView cancelCurrentImageRequest];
-#elif HasSDWebImage
-//    [self.imageView sd_cancelCurrentAnimationImagesLoad];
-#endif
-    if (self.requestID) {
-        [[PHImageManager defaultManager] cancelImageRequest:self.requestID];
-        self.requestID = -1;
-    }
-    if (self.iCloudRequestID) {
-        [[PHImageManager defaultManager] cancelImageRequest:self.iCloudRequestID];
-        self.iCloudRequestID = -1;
-    }
-}
-- (void)didSelectClick:(UIButton *)button {
-    if (self.model.type == HXPhotoModelMediaTypeCamera) {
-        return;
-    }
-    if (self.model.isICloud) {
-        return;
-    }
-    if ([self.delegate respondsToSelector:@selector(photoViewCell:didSelectBtn:)]) {
-        [self.delegate photoViewCell:self didSelectBtn:button];
-    }
-}
-- (void)setHighlighted:(BOOL)highlighted {
-    [super setHighlighted:highlighted];
-    self.highlightMaskView.hidden = !highlighted;
-}
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    self.imageView.frame = self.bounds;
-    self.maskView.frame = self.bounds;
-    self.stateLb.frame = CGRectMake(0, self.hx_h - 18, self.hx_w - 4, 18);
-    self.bottomMaskLayer.frame = CGRectMake(0, self.hx_h - 25, self.hx_w, 25);
-    self.selectBtn.frame = CGRectMake(self.hx_w - 27, 2, 25, 25);
-    self.selectMaskLayer.frame = self.bounds;
-    self.iCloudMaskLayer.frame = self.bounds;
-    self.iCloudIcon.hx_x = self.hx_w - 3 - self.iCloudIcon.hx_w;
-    self.iCloudIcon.hx_y = 3;
-    self.downloadView.frame = self.bounds;
-    self.progressView.center = CGPointMake(self.hx_w / 2, self.hx_h / 2);
-    self.videoMaskLayer.frame = self.bounds;
-    self.highlightMaskView.frame = self.bounds;
-}
-- (void)dealloc {
-    self.model.dateCellIsVisible = NO;
-}
-#pragma mark - < 懒加载 >
-- (UIView *)highlightMaskView {
-    if (!_highlightMaskView) {
-        _highlightMaskView = [[UIView alloc] initWithFrame:self.bounds];
-        _highlightMaskView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
-        _highlightMaskView.hidden = YES;
-    }
-    return _highlightMaskView;
-}
-- (HXDownloadProgressView *)downloadView {
-    if (!_downloadView) {
-        _downloadView = [[HXDownloadProgressView alloc] initWithFrame:self.bounds];
-    }
-    return _downloadView;
-}
-- (HXCircleProgressView *)progressView {
-    if (!_progressView) {
-        _progressView = [[HXCircleProgressView alloc] init];
-        _progressView.hidden = YES;
-    }
-    return _progressView;
-}
-- (UIImageView *)imageView {
-    if (!_imageView) {
-        _imageView = [[UIImageView alloc] init];
-        _imageView.contentMode = UIViewContentModeScaleAspectFill;
-        _imageView.clipsToBounds = YES;
-        _imageView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1];
-        _imageView.hidden = YES;
-        _imageView.alpha = 0.f;
-    }
-    return _imageView;
-}
-- (UIView *)maskView {
-    if (!_maskView) {
-        _maskView = [[UIView alloc] init];
-        [_maskView.layer addSublayer:self.bottomMaskLayer];
-        [_maskView.layer addSublayer:self.selectMaskLayer];
-        [_maskView.layer addSublayer:self.iCloudMaskLayer];
-        [_maskView.layer addSublayer:self.videoMaskLayer];
-        [_maskView addSubview:self.iCloudIcon];
-        [_maskView addSubview:self.stateLb];
-        [_maskView addSubview:self.selectBtn];
-        _maskView.hidden = YES;
-        _maskView.alpha = 0;
-    }
-    return _maskView;
-}
-- (UIImageView *)iCloudIcon {
-    if (!_iCloudIcon) {
-        _iCloudIcon = [[UIImageView alloc] initWithImage:[UIImage hx_imageNamed:@"hx_yunxiazai"]];
-        _iCloudIcon.hx_size = _iCloudIcon.image.size;
-    }
-    return _iCloudIcon;
-}
-- (CALayer *)selectMaskLayer {
-    if (!_selectMaskLayer) {
-        _selectMaskLayer = [CALayer layer];
-        _selectMaskLayer.hidden = YES;
-        _selectMaskLayer.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3].CGColor;
-    }
-    return _selectMaskLayer;
-}
-- (CALayer *)iCloudMaskLayer {
-    if (!_iCloudMaskLayer) {
-        _iCloudMaskLayer = [CALayer layer];
-        _iCloudMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3].CGColor;
-    }
-    return _iCloudMaskLayer;
-}
-- (CALayer *)videoMaskLayer {
-    if (!_videoMaskLayer) {
-        _videoMaskLayer = [CALayer layer];
-        _videoMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5].CGColor;
-    }
-    return _videoMaskLayer;
-}
-- (UILabel *)stateLb {
-    if (!_stateLb) {
-        _stateLb = [[UILabel alloc] init];
-        _stateLb.textColor = [UIColor whiteColor];
-        _stateLb.textAlignment = NSTextAlignmentRight;
-        _stateLb.font = [UIFont hx_mediumSFUITextOfSize:12];
-    }
-    return _stateLb;
-}
-- (CAGradientLayer *)bottomMaskLayer {
-    if (!_bottomMaskLayer) {
-        _bottomMaskLayer = [CAGradientLayer layer];
-        _bottomMaskLayer.colors = @[
-                                    (id)[[UIColor blackColor] colorWithAlphaComponent:0].CGColor ,
-                                    (id)[[UIColor blackColor] colorWithAlphaComponent:0.15].CGColor ,
-                                    (id)[[UIColor blackColor] colorWithAlphaComponent:0.35].CGColor ,
-                                    (id)[[UIColor blackColor] colorWithAlphaComponent:0.6].CGColor
-                                    ];
-        _bottomMaskLayer.startPoint = CGPointMake(0, 0);
-        _bottomMaskLayer.endPoint = CGPointMake(0, 1);
-        _bottomMaskLayer.locations = @[@(0.15f),@(0.35f),@(0.6f),@(0.9f)];
-        _bottomMaskLayer.borderWidth  = 0.0;
-    }
-    return _bottomMaskLayer;
-}
-- (UIButton *)selectBtn {
-    if (!_selectBtn) {
-        _selectBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_selectBtn setBackgroundImage:[UIImage hx_imageNamed:@"hx_compose_guide_check_box_default"] forState:UIControlStateNormal];
-        [_selectBtn setBackgroundImage:[[UIImage alloc] init] forState:UIControlStateSelected];
-        [_selectBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-        _selectBtn.titleLabel.font = [UIFont systemFontOfSize:14];
-        _selectBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
-        [_selectBtn addTarget:self action:@selector(didSelectClick:) forControlEvents:UIControlEventTouchUpInside];
-        [_selectBtn setEnlargeEdgeWithTop:0 right:0 bottom:15 left:15];
-        _selectBtn.layer.cornerRadius = 25 / 2;
-    }
-    return _selectBtn;
-}
-@end
-
-@interface HXPhotoViewSectionHeaderView ()
-@property (strong, nonatomic) UILabel *dateLb;
-@property (strong, nonatomic) UILabel *subTitleLb;
-@property (strong, nonatomic) UIToolbar *bgView;
-@end
-
-@implementation HXPhotoViewSectionHeaderView
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (self) {
-        [self setupUI];
-    }
-    return self;
-}
-- (void)setupUI {
-    [self addSubview:self.bgView];
-    [self addSubview:self.dateLb];
-    [self addSubview:self.subTitleLb];
-}
-- (void)setChangeState:(BOOL)changeState {
-    _changeState = changeState;
-    if (self.translucent) {
-        self.bgView.translucent = changeState;
-    }
-    if (self.suspensionBgColor) {
-        self.translucent = NO;
-    }
-    if (changeState) {
-        if (self.translucent) {
-            self.bgView.alpha = 1;
+    - (void)setSelectBgColor:(UIColor *)selectBgColor {
+        _selectBgColor = selectBgColor;
+        if ([selectBgColor isEqual:[UIColor whiteColor]] && !self.selectedTitleColor) {
+            [self.selectBtn setTitleColor:[UIColor blackColor] forState:UIControlStateSelected];
         }
-        if (self.suspensionTitleColor) {
-            self.dateLb.textColor = self.suspensionTitleColor;
-            self.subTitleLb.textColor = self.suspensionTitleColor;
+    }
+    - (void)setSelectedTitleColor:(UIColor *)selectedTitleColor {
+        _selectedTitleColor = selectedTitleColor;
+        [self.selectBtn setTitleColor:selectedTitleColor forState:UIControlStateSelected];
+    }
+    - (void)startRequestICloudAsset {
+        self.downloadView.hidden = NO;
+        [self.downloadView startAnima];
+        self.iCloudIcon.hidden = YES;
+        self.iCloudMaskLayer.hidden = YES;
+        HXWeakSelf
+        if (self.model.type == HXPhotoModelMediaTypeVideo) {
+            self.iCloudRequestID = [self.model requestAVAssetStartRequestICloud:^(PHImageRequestID iCloudRequestId, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    weakSelf.downloadView.hidden = NO;
+                    weakSelf.iCloudRequestID = iCloudRequestId;
+                }
+            } progressHandler:^(double progress, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    weakSelf.downloadView.hidden = NO;
+                    weakSelf.downloadView.progress = progress;
+                }
+            } success:^(AVAsset *avAsset, AVAudioMix *audioMix, HXPhotoModel *model, NSDictionary *info) {
+                if (weakSelf.model == model) {
+                    weakSelf.model.isICloud = NO;
+                    weakSelf.downloadView.progress = 1;
+                    if ([weakSelf.delegate respondsToSelector:@selector(photoViewCellRequestICloudAssetComplete:)]) {
+                        [weakSelf.delegate photoViewCellRequestICloudAssetComplete:weakSelf];
+                    }
+                }
+            } failed:^(NSDictionary *info, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    [weakSelf downloadError:info];
+                }
+            }];
+        }else if (self.model.type == HXPhotoModelMediaTypeLivePhoto){
+            self.iCloudRequestID = [self.model requestLivePhotoWithSize:CGSizeMake(self.model.previewViewSize.width * 1.5, self.model.previewViewSize.height * 1.5) startRequestICloud:^(PHImageRequestID iCloudRequestId, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    weakSelf.downloadView.hidden = NO;
+                    weakSelf.iCloudRequestID = iCloudRequestId;
+                }
+            } progressHandler:^(double progress, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    weakSelf.downloadView.hidden = NO;
+                    weakSelf.downloadView.progress = progress;
+                }
+            } success:^(PHLivePhoto *livePhoto, HXPhotoModel *model, NSDictionary *info) {
+                if (weakSelf.model == model) {
+                    weakSelf.model.isICloud = NO;
+                    weakSelf.downloadView.progress = 1;
+                    if ([weakSelf.delegate respondsToSelector:@selector(photoViewCellRequestICloudAssetComplete:)]) {
+                        [weakSelf.delegate photoViewCellRequestICloudAssetComplete:weakSelf];
+                    }
+                }
+            } failed:^(NSDictionary *info, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    [weakSelf downloadError:info];
+                }
+            }];
+        }else {
+            self.iCloudRequestID = [self.model requestImageDataStartRequestICloud:^(PHImageRequestID iCloudRequestId, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    weakSelf.downloadView.hidden = NO;
+                    weakSelf.iCloudRequestID = iCloudRequestId;
+                }
+            } progressHandler:^(double progress, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    weakSelf.downloadView.hidden = NO;
+                    weakSelf.downloadView.progress = progress;
+                }
+            } success:^(NSData *imageData, UIImageOrientation orientation, HXPhotoModel *model, NSDictionary *info) {
+                if (weakSelf.model == model) {
+                    weakSelf.model.isICloud = NO;
+                    weakSelf.downloadView.progress = 1;
+                    if ([weakSelf.delegate respondsToSelector:@selector(photoViewCellRequestICloudAssetComplete:)]) {
+                        [weakSelf.delegate photoViewCellRequestICloudAssetComplete:weakSelf];
+                    }
+                }
+            } failed:^(NSDictionary *info, HXPhotoModel *model) {
+                if (weakSelf.model == model) {
+                    [weakSelf downloadError:info];
+                }
+            }];
+        }
+    }
+    - (void)downloadError:(NSDictionary *)info {
+        if (![[info objectForKey:PHImageCancelledKey] boolValue]) {
+            [[self hx_viewController].view hx_showImageHUDText:[NSBundle hx_localizedStringForKey:@"下载失败，请重试！"]];
+        }
+        self.downloadView.hidden = YES;
+        [self.downloadView resetState];
+        self.iCloudIcon.hidden = !self.model.isICloud;
+        self.iCloudMaskLayer.hidden = !self.model.isICloud;
+    }
+    - (void)cancelRequest {
+#if HasYYWebImage
+        [self.imageView yy_cancelCurrentImageRequest];
+#elif HasYYKit
+        [self.imageView cancelCurrentImageRequest];
+#elif HasSDWebImage
+        //    [self.imageView sd_cancelCurrentAnimationImagesLoad];
+#endif
+        if (self.requestID) {
+            [[PHImageManager defaultManager] cancelImageRequest:self.requestID];
+            self.requestID = -1;
+        }
+        if (self.iCloudRequestID) {
+            [[PHImageManager defaultManager] cancelImageRequest:self.iCloudRequestID];
+            self.iCloudRequestID = -1;
+        }
+    }
+    - (void)didSelectClick:(UIButton *)button {
+        if (self.model.type == HXPhotoModelMediaTypeCamera) {
+            return;
+        }
+        if (self.model.isICloud) {
+            return;
+        }
+        if ([self.delegate respondsToSelector:@selector(photoViewCell:didSelectBtn:)]) {
+            [self.delegate photoViewCell:self didSelectBtn:button];
+        }
+    }
+    - (void)setHighlighted:(BOOL)highlighted {
+        [super setHighlighted:highlighted];
+        self.highlightMaskView.hidden = !highlighted;
+    }
+    - (void)layoutSubviews {
+        [super layoutSubviews];
+        self.imageView.frame = self.bounds;
+        self.maskView.frame = self.bounds;
+        self.stateLb.frame = CGRectMake(0, self.hx_h - 18, self.hx_w - 4, 18);
+        self.bottomMaskLayer.frame = CGRectMake(0, self.hx_h - 25, self.hx_w, 25);
+        self.selectBtn.frame = CGRectMake(self.hx_w - 27, 2, 25, 25);
+        self.selectMaskLayer.frame = self.bounds;
+        self.iCloudMaskLayer.frame = self.bounds;
+        self.iCloudIcon.hx_x = self.hx_w - 3 - self.iCloudIcon.hx_w;
+        self.iCloudIcon.hx_y = 3;
+        self.downloadView.frame = self.bounds;
+        self.progressView.center = CGPointMake(self.hx_w / 2, self.hx_h / 2);
+        self.videoMaskLayer.frame = self.bounds;
+        self.highlightMaskView.frame = self.bounds;
+    }
+    - (void)dealloc {
+        self.model.dateCellIsVisible = NO;
+    }
+#pragma mark - < 懒加载 >
+    - (UIView *)highlightMaskView {
+        if (!_highlightMaskView) {
+            _highlightMaskView = [[UIView alloc] initWithFrame:self.bounds];
+            _highlightMaskView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
+            _highlightMaskView.hidden = YES;
+        }
+        return _highlightMaskView;
+    }
+    - (HXDownloadProgressView *)downloadView {
+        if (!_downloadView) {
+            _downloadView = [[HXDownloadProgressView alloc] initWithFrame:self.bounds];
+        }
+        return _downloadView;
+    }
+    - (HXCircleProgressView *)progressView {
+        if (!_progressView) {
+            _progressView = [[HXCircleProgressView alloc] init];
+            _progressView.hidden = YES;
+        }
+        return _progressView;
+    }
+    - (UIImageView *)imageView {
+        if (!_imageView) {
+            _imageView = [[UIImageView alloc] init];
+            _imageView.contentMode = UIViewContentModeScaleAspectFill;
+            _imageView.clipsToBounds = YES;
+            _imageView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1];
+            _imageView.hidden = YES;
+            _imageView.alpha = 0.f;
+        }
+        return _imageView;
+    }
+    - (UIView *)maskView {
+        if (!_maskView) {
+            _maskView = [[UIView alloc] init];
+            [_maskView.layer addSublayer:self.bottomMaskLayer];
+            [_maskView.layer addSublayer:self.selectMaskLayer];
+            [_maskView.layer addSublayer:self.iCloudMaskLayer];
+            [_maskView.layer addSublayer:self.videoMaskLayer];
+            [_maskView addSubview:self.iCloudIcon];
+            [_maskView addSubview:self.stateLb];
+            [_maskView addSubview:self.selectBtn];
+            _maskView.hidden = YES;
+            _maskView.alpha = 0;
+        }
+        return _maskView;
+    }
+    - (UIImageView *)iCloudIcon {
+        if (!_iCloudIcon) {
+            _iCloudIcon = [[UIImageView alloc] initWithImage:[UIImage hx_imageNamed:@"hx_yunxiazai"]];
+            _iCloudIcon.hx_size = _iCloudIcon.image.size;
+        }
+        return _iCloudIcon;
+    }
+    - (CALayer *)selectMaskLayer {
+        if (!_selectMaskLayer) {
+            _selectMaskLayer = [CALayer layer];
+            _selectMaskLayer.hidden = YES;
+            _selectMaskLayer.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3].CGColor;
+        }
+        return _selectMaskLayer;
+    }
+    - (CALayer *)iCloudMaskLayer {
+        if (!_iCloudMaskLayer) {
+            _iCloudMaskLayer = [CALayer layer];
+            _iCloudMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3].CGColor;
+        }
+        return _iCloudMaskLayer;
+    }
+    - (CALayer *)videoMaskLayer {
+        if (!_videoMaskLayer) {
+            _videoMaskLayer = [CALayer layer];
+            _videoMaskLayer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5].CGColor;
+        }
+        return _videoMaskLayer;
+    }
+    - (UILabel *)stateLb {
+        if (!_stateLb) {
+            _stateLb = [[UILabel alloc] init];
+            _stateLb.textColor = [UIColor whiteColor];
+            _stateLb.textAlignment = NSTextAlignmentRight;
+            _stateLb.font = [UIFont hx_mediumSFUITextOfSize:12];
+        }
+        return _stateLb;
+    }
+    - (CAGradientLayer *)bottomMaskLayer {
+        if (!_bottomMaskLayer) {
+            _bottomMaskLayer = [CAGradientLayer layer];
+            _bottomMaskLayer.colors = @[
+                                        (id)[[UIColor blackColor] colorWithAlphaComponent:0].CGColor ,
+                                        (id)[[UIColor blackColor] colorWithAlphaComponent:0.15].CGColor ,
+                                        (id)[[UIColor blackColor] colorWithAlphaComponent:0.35].CGColor ,
+                                        (id)[[UIColor blackColor] colorWithAlphaComponent:0.6].CGColor
+                                        ];
+            _bottomMaskLayer.startPoint = CGPointMake(0, 0);
+            _bottomMaskLayer.endPoint = CGPointMake(0, 1);
+            _bottomMaskLayer.locations = @[@(0.15f),@(0.35f),@(0.6f),@(0.9f)];
+            _bottomMaskLayer.borderWidth  = 0.0;
+        }
+        return _bottomMaskLayer;
+    }
+    - (UIButton *)selectBtn {
+        if (!_selectBtn) {
+            _selectBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+            [_selectBtn setBackgroundImage:[UIImage hx_imageNamed:@"hx_compose_guide_check_box_default"] forState:UIControlStateNormal];
+            [_selectBtn setBackgroundImage:[[UIImage alloc] init] forState:UIControlStateSelected];
+            [_selectBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+            _selectBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+            _selectBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
+            [_selectBtn addTarget:self action:@selector(didSelectClick:) forControlEvents:UIControlEventTouchUpInside];
+            [_selectBtn setEnlargeEdgeWithTop:0 right:0 bottom:15 left:15];
+            _selectBtn.layer.cornerRadius = 25 / 2;
+        }
+        return _selectBtn;
+    }
+    @end
+    
+    @interface HXPhotoViewSectionHeaderView ()
+    @property (strong, nonatomic) UILabel *dateLb;
+    @property (strong, nonatomic) UILabel *subTitleLb;
+    @property (strong, nonatomic) UIToolbar *bgView;
+    @end
+    
+    @implementation HXPhotoViewSectionHeaderView
+    - (instancetype)initWithFrame:(CGRect)frame {
+        self = [super initWithFrame:frame];
+        if (self) {
+            [self setupUI];
+        }
+        return self;
+    }
+    - (void)setupUI {
+        [self addSubview:self.bgView];
+        [self addSubview:self.dateLb];
+        [self addSubview:self.subTitleLb];
+    }
+    - (void)setChangeState:(BOOL)changeState {
+        _changeState = changeState;
+        if (self.translucent) {
+            self.bgView.translucent = changeState;
         }
         if (self.suspensionBgColor) {
-            self.bgView.barTintColor = self.suspensionBgColor;
+            self.translucent = NO;
         }
-    }else {
-        if (!self.translucent) {
+        if (changeState) {
+            if (self.translucent) {
+                self.bgView.alpha = 1;
+            }
+            if (self.suspensionTitleColor) {
+                self.dateLb.textColor = self.suspensionTitleColor;
+                self.subTitleLb.textColor = self.suspensionTitleColor;
+            }
+            if (self.suspensionBgColor) {
+                self.bgView.barTintColor = self.suspensionBgColor;
+            }
+        }else {
+            if (!self.translucent) {
+                self.bgView.barTintColor = [UIColor whiteColor];
+            }
+            if (self.translucent) {
+                self.bgView.alpha = 0;
+            }
+            self.dateLb.textColor = [UIColor blackColor];
+            self.subTitleLb.textColor = [UIColor colorWithRed:140.f / 255.f green:140.f / 255.f blue:140.f / 255.f alpha:1];
+        }
+    }
+    - (void)setTranslucent:(BOOL)translucent {
+        _translucent = translucent;
+        if (!translucent) {
+            self.bgView.translucent = YES;
             self.bgView.barTintColor = [UIColor whiteColor];
         }
-        if (self.translucent) {
-            self.bgView.alpha = 0;
-        }
-        self.dateLb.textColor = [UIColor blackColor];
-        self.subTitleLb.textColor = [UIColor colorWithRed:140.f / 255.f green:140.f / 255.f blue:140.f / 255.f alpha:1];
     }
-}
-- (void)setTranslucent:(BOOL)translucent {
-    _translucent = translucent;
-    if (!translucent) {
-        self.bgView.translucent = YES;
-        self.bgView.barTintColor = [UIColor whiteColor];
-    }
-}
-- (void)setModel:(HXPhotoDateModel *)model {
-    _model = model;
-    if (model.location) {
-        if (model.hasLocationTitles) {
-            [self updateDateData];
+    - (void)setModel:(HXPhotoDateModel *)model {
+        _model = model;
+        if (model.location) {
+            if (model.hasLocationTitles) {
+                [self updateDateData];
+            }else {
+                self.dateLb.frame = CGRectMake(8, 0, self.hx_w - 16, 50);
+                self.dateLb.text = model.dateString;
+                self.subTitleLb.hidden = YES;
+                HXWeakSelf
+                [HXPhotoTools getDateLocationDetailInformationWithModel:model completion:^(CLPlacemark * _Nullable placemark, HXPhotoDateModel *model, NSError * _Nullable error) {
+                    if (!error) {
+                        if (placemark.locality) {
+                            NSString *province = placemark.administrativeArea;
+                            NSString *city = placemark.locality;
+                            NSString *area = placemark.subLocality;
+                            NSString *street = placemark.thoroughfare;
+                            NSString *subStreet = placemark.subThoroughfare;
+                            if (area) {
+                                model.locationTitle = [NSString stringWithFormat:@"%@ ﹣ %@",city,area];
+                            }else {
+                                model.locationTitle = [NSString stringWithFormat:@"%@",city];
+                            }
+                            if (street) {
+                                if (subStreet) {
+                                    model.locationSubTitle = [NSString stringWithFormat:@"%@・%@%@",model.dateString,street,subStreet];
+                                }else {
+                                    model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,street];
+                                }
+                            }else if (province) {
+                                model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,province];
+                            }else {
+                                model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,city];
+                            }
+                        }else {
+                            NSString *province = placemark.administrativeArea;
+                            model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,province];
+                            model.locationTitle = province;
+                        }
+                        model.locationError = NO;
+                    }else {
+                        model.locationError = YES;
+                    }
+                    if (weakSelf.model == model) {
+                        weakSelf.model.hasLocationTitles = YES;
+                        [weakSelf updateDateData];
+                    }
+                }];
+            }
         }else {
             self.dateLb.frame = CGRectMake(8, 0, self.hx_w - 16, 50);
             self.dateLb.text = model.dateString;
             self.subTitleLb.hidden = YES;
-            HXWeakSelf
-            [HXPhotoTools getDateLocationDetailInformationWithModel:model completion:^(CLPlacemark * _Nullable placemark, HXPhotoDateModel *model, NSError * _Nullable error) {
-                if (!error) {
-                    if (placemark.locality) {
-                        NSString *province = placemark.administrativeArea;
-                        NSString *city = placemark.locality;
-                        NSString *area = placemark.subLocality;
-                        NSString *street = placemark.thoroughfare;
-                        NSString *subStreet = placemark.subThoroughfare;
-                        if (area) {
-                            model.locationTitle = [NSString stringWithFormat:@"%@ ﹣ %@",city,area];
-                        }else {
-                            model.locationTitle = [NSString stringWithFormat:@"%@",city];
-                        }
-                        if (street) {
-                            if (subStreet) {
-                                model.locationSubTitle = [NSString stringWithFormat:@"%@・%@%@",model.dateString,street,subStreet];
-                            }else {
-                                model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,street];
-                            }
-                        }else if (province) {
-                            model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,province];
-                        }else {
-                            model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,city];
-                        }
-                    }else {
-                        NSString *province = placemark.administrativeArea;
-                        model.locationSubTitle = [NSString stringWithFormat:@"%@・%@",model.dateString,province];
-                        model.locationTitle = province;
-                    }
-                    model.locationError = NO;
-                }else {
-                    model.locationError = YES;
-                }
-                if (weakSelf.model == model) {
-                    weakSelf.model.hasLocationTitles = YES;
-                    [weakSelf updateDateData];
-                }
-            }];
         }
-    }else {
-        self.dateLb.frame = CGRectMake(8, 0, self.hx_w - 16, 50);
-        self.dateLb.text = model.dateString;
-        self.subTitleLb.hidden = YES;
     }
-}
-- (void)updateDateData {
-    if (self.model.locationError) {
-        self.dateLb.frame = CGRectMake(8, 0, self.hx_w - 16, 50);
-        self.subTitleLb.hidden = YES;
-        self.dateLb.text = self.model.dateString;
-    }else {
-        if (self.model.locationSubTitle) {
-            self.dateLb.frame = CGRectMake(8, 4, self.hx_w - 16, 30);
-            self.subTitleLb.frame = CGRectMake(8, 28, self.hx_w - 16, 20);
-            self.subTitleLb.hidden = NO;
-            self.subTitleLb.text = self.model.locationSubTitle;
-        }else {
+    - (void)updateDateData {
+        if (self.model.locationError) {
             self.dateLb.frame = CGRectMake(8, 0, self.hx_w - 16, 50);
             self.subTitleLb.hidden = YES;
-        }
-        self.dateLb.text = self.model.locationTitle;
-    }
-}
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    self.bgView.frame = self.bounds;
-}
-- (UILabel *)dateLb {
-    if (!_dateLb) {
-        _dateLb = [[UILabel alloc] init];
-        _dateLb.textColor = [UIColor blackColor];
-        _dateLb.font = [UIFont hx_boldPingFangOfSize:16];
-    }
-    return _dateLb;
-}
-- (UIToolbar *)bgView {
-    if (!_bgView) {
-        _bgView = [[UIToolbar alloc] init];
-        _bgView.translucent = NO;
-        _bgView.clipsToBounds = YES;
-    }
-    return _bgView;
-}
-- (UILabel *)subTitleLb {
-    if (!_subTitleLb) {
-        _subTitleLb = [[UILabel alloc] init];
-        _subTitleLb.textColor = [UIColor colorWithRed:140.f / 255.f green:140.f / 255.f blue:140.f / 255.f alpha:1];
-        _subTitleLb.font = [UIFont hx_regularPingFangOfSize:12];
-    }
-    return _subTitleLb;
-}
-@end
-
-@interface HXPhotoViewSectionFooterView ()
-@property (strong, nonatomic) UILabel *titleLb;
-@end
-
-@implementation HXPhotoViewSectionFooterView
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (self) {
-        [self setupUI];
-    }
-    return self;
-}
-- (void)setupUI {
-    self.backgroundColor = [UIColor whiteColor];
-    [self addSubview:self.titleLb];
-}
-- (void)setVideoCount:(NSInteger)videoCount {
-    _videoCount = videoCount;
-    NSDictionary *dict = @{NSFontAttributeName : [UIFont hx_mediumSFUITextOfSize:15] ,
-                           NSForegroundColorAttributeName : [UIColor colorWithRed:51.f / 255.f green:51.f / 255.f blue:51.f / 255.f alpha:1]
-                           };
-    
-    NSAttributedString *photoCountStr = [[NSAttributedString alloc] initWithString:[@(self.photoCount).stringValue hx_countStrBecomeComma] attributes:dict];
-    
-    NSAttributedString *videoCountStr = [[NSAttributedString alloc] initWithString:[@(videoCount).stringValue hx_countStrBecomeComma] attributes:dict];
-    
-    
-    if (self.photoCount > 0 && videoCount > 0) {
-        NSString *photoStr;
-        if (self.photoCount > 1) {
-            photoStr = @"Photos";
+            self.dateLb.text = self.model.dateString;
         }else {
-            photoStr = @"Photo";
-        }
-        NSString *videoStr;
-        if (videoCount > 1) {
-            videoStr = @"Videos";
-        }else {
-            videoStr = @"Video";
-        }
-        NSMutableAttributedString *atbStr = [[NSMutableAttributedString alloc] init];
-        NSAttributedString *photoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@、",[NSBundle hx_localizedStringForKey:photoStr]] attributes:dict];
-        [atbStr appendAttributedString:photoCountStr];
-        [atbStr appendAttributedString:photoAtbStr];
-        
-        NSAttributedString *videoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@",[NSBundle hx_localizedStringForKey:videoStr]] attributes:dict];
-        [atbStr appendAttributedString:videoCountStr];
-        [atbStr appendAttributedString:videoAtbStr];
-
-        self.titleLb.attributedText = atbStr;
-//        self.titleLb.text = [NSString stringWithFormat:@"%ld %@、%ld %@",self.photoCount,[NSBundle hx_localizedStringForKey:photoStr],videoCount,[NSBundle hx_localizedStringForKey:videoStr]];
-        
-    }else if (self.photoCount > 0) {
-        NSString *photoStr;
-        if (self.photoCount > 1) {
-            photoStr = @"Photos";
-        }else {
-            photoStr = @"Photo";
-        }
-        NSMutableAttributedString *atbStr = [[NSMutableAttributedString alloc] init];
-        NSAttributedString *photoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@",[NSBundle hx_localizedStringForKey:photoStr]] attributes:dict];
-        [atbStr appendAttributedString:photoCountStr];
-        [atbStr appendAttributedString:photoAtbStr];
-        
-        
-        self.titleLb.attributedText = atbStr;
-//        self.titleLb.text = [NSString stringWithFormat:@"%ld %@",self.photoCount,[NSBundle hx_localizedStringForKey:photoStr]];
-    }else {
-        NSString *videoStr;
-        if (videoCount > 1) {
-            videoStr = @"Videos";
-        }else {
-            videoStr = @"Video";
-        }
-        NSMutableAttributedString *atbStr = [[NSMutableAttributedString alloc] init];
-        
-        NSAttributedString *videoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@",[NSBundle hx_localizedStringForKey:videoStr]] attributes:dict];
-        [atbStr appendAttributedString:videoCountStr];
-        [atbStr appendAttributedString:videoAtbStr];
-        
-        self.titleLb.attributedText = atbStr;
-//        self.titleLb.text = [NSString stringWithFormat:@"%ld %@",videoCount, [NSBundle hx_localizedStringForKey:videoStr]];
-    }
-}
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    self.titleLb.frame = CGRectMake(0, 0, self.hx_w, 50);
-}
-- (UILabel *)titleLb {
-    if (!_titleLb) {
-        _titleLb = [[UILabel alloc] init];
-//        _titleLb.textColor = [UIColor blackColor];
-        _titleLb.textAlignment = NSTextAlignmentCenter;
-//        _titleLb.font = [UIFont hx_helveticaNeueOfSize:15];
-    }
-    return _titleLb;
-}
-@end
-
-@interface HXPhotoBottomView ()
-@property (strong, nonatomic) UIButton *previewBtn;
-@property (strong, nonatomic) UIButton *doneBtn;
-@property (strong, nonatomic) UIButton *editBtn;
-@end
-
-@implementation HXPhotoBottomView
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (self) {
-        [self setupUI];
-    }
-    return self;
-}
-- (void)setupUI {
-    [self addSubview:self.bgView];
-    [self addSubview:self.previewBtn];
-    [self addSubview:self.originalBtn];
-    [self addSubview:self.doneBtn];
-    [self addSubview:self.editBtn];
-    [self changeDoneBtnFrame];
-}
-- (void)setManager:(HXPhotoManager *)manager {
-    _manager = manager;
-    self.originalBtn.hidden = manager.configuration.hideOriginalBtn;
-    if (manager.type == HXPhotoManagerSelectedTypePhoto) {
-        self.editBtn.hidden = !manager.configuration.photoCanEdit;
-    }else if (manager.type == HXPhotoManagerSelectedTypeVideo) {
-        self.originalBtn.hidden = YES;
-        self.editBtn.hidden = !manager.configuration.videoCanEdit;
-    }else {
-        if (!manager.configuration.videoCanEdit && !manager.configuration.photoCanEdit) {
-            self.editBtn.hidden = YES;
-        }
-    }
-    self.originalBtn.selected = manager.original;
-    
-    [self.previewBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
-    [self.previewBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-    self.doneBtn.backgroundColor = [manager.configuration.themeColor colorWithAlphaComponent:0.5];
-    [self.originalBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
-    [self.originalBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-    
-    UIImage *originalNormalImage = [[UIImage hx_imageNamed:manager.configuration.originalNormalImageName] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    UIImage *originalSelectedImage = [UIImage hx_imageNamed:manager.configuration.originalSelectedImageName] ;
-    
-    
-    if ([manager.configuration.originalNormalImageName isEqualToString:@"hx_original_normal"] &&
-        [manager.configuration.originalSelectedImageName isEqualToString:@"hx_original_selected"]) {
-        CGFloat red, green, blue, alpha;
-        [manager.configuration.themeColor getRed:&red green:&green blue:&blue alpha:&alpha];
-        BOOL sameColor = (red == 0) && (green == 0.47843137254901963) && (blue == 1) && (alpha == 1);
-        if (!sameColor) {
-            originalNormalImage = [originalNormalImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-            originalSelectedImage = [originalSelectedImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-            if (manager.configuration.isWXStyle) {
-                self.originalBtn.imageView.tintColor = [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1];
+            if (self.model.locationSubTitle) {
+                self.dateLb.frame = CGRectMake(8, 4, self.hx_w - 16, 30);
+                self.subTitleLb.frame = CGRectMake(8, 28, self.hx_w - 16, 20);
+                self.subTitleLb.hidden = NO;
+                self.subTitleLb.text = self.model.locationSubTitle;
+            }else {
+                self.dateLb.frame = CGRectMake(8, 0, self.hx_w - 16, 50);
+                self.subTitleLb.hidden = YES;
             }
-            else
-            {
-                self.originalBtn.imageView.tintColor = manager.configuration.themeColor;
+            self.dateLb.text = self.model.locationTitle;
+        }
+    }
+    - (void)layoutSubviews {
+        [super layoutSubviews];
+        self.bgView.frame = self.bounds;
+    }
+    - (UILabel *)dateLb {
+        if (!_dateLb) {
+            _dateLb = [[UILabel alloc] init];
+            _dateLb.textColor = [UIColor blackColor];
+            _dateLb.font = [UIFont hx_boldPingFangOfSize:16];
+        }
+        return _dateLb;
+    }
+    - (UIToolbar *)bgView {
+        if (!_bgView) {
+            _bgView = [[UIToolbar alloc] init];
+            _bgView.translucent = NO;
+            _bgView.clipsToBounds = YES;
+        }
+        return _bgView;
+    }
+    - (UILabel *)subTitleLb {
+        if (!_subTitleLb) {
+            _subTitleLb = [[UILabel alloc] init];
+            _subTitleLb.textColor = [UIColor colorWithRed:140.f / 255.f green:140.f / 255.f blue:140.f / 255.f alpha:1];
+            _subTitleLb.font = [UIFont hx_regularPingFangOfSize:12];
+        }
+        return _subTitleLb;
+    }
+    @end
+    
+    @interface HXPhotoViewSectionFooterView ()
+    @property (strong, nonatomic) UILabel *titleLb;
+    @end
+    
+    @implementation HXPhotoViewSectionFooterView
+    - (instancetype)initWithFrame:(CGRect)frame {
+        self = [super initWithFrame:frame];
+        if (self) {
+            [self setupUI];
+        }
+        return self;
+    }
+    - (void)setupUI {
+        self.backgroundColor = [UIColor whiteColor];
+        [self addSubview:self.titleLb];
+    }
+    - (void)setVideoCount:(NSInteger)videoCount {
+        _videoCount = videoCount;
+        NSDictionary *dict = @{NSFontAttributeName : [UIFont hx_mediumSFUITextOfSize:15] ,
+                               NSForegroundColorAttributeName : [UIColor colorWithRed:51.f / 255.f green:51.f / 255.f blue:51.f / 255.f alpha:1]
+                               };
+        
+        NSAttributedString *photoCountStr = [[NSAttributedString alloc] initWithString:[@(self.photoCount).stringValue hx_countStrBecomeComma] attributes:dict];
+        
+        NSAttributedString *videoCountStr = [[NSAttributedString alloc] initWithString:[@(videoCount).stringValue hx_countStrBecomeComma] attributes:dict];
+        
+        
+        if (self.photoCount > 0 && videoCount > 0) {
+            NSString *photoStr;
+            if (self.photoCount > 1) {
+                photoStr = @"Photos";
+            }else {
+                photoStr = @"Photo";
             }
+            NSString *videoStr;
+            if (videoCount > 1) {
+                videoStr = @"Videos";
+            }else {
+                videoStr = @"Video";
+            }
+            NSMutableAttributedString *atbStr = [[NSMutableAttributedString alloc] init];
+            NSAttributedString *photoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@、",[NSBundle hx_localizedStringForKey:photoStr]] attributes:dict];
+            [atbStr appendAttributedString:photoCountStr];
+            [atbStr appendAttributedString:photoAtbStr];
             
+            NSAttributedString *videoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@",[NSBundle hx_localizedStringForKey:videoStr]] attributes:dict];
+            [atbStr appendAttributedString:videoCountStr];
+            [atbStr appendAttributedString:videoAtbStr];
+            
+            self.titleLb.attributedText = atbStr;
+            //        self.titleLb.text = [NSString stringWithFormat:@"%ld %@、%ld %@",self.photoCount,[NSBundle hx_localizedStringForKey:photoStr],videoCount,[NSBundle hx_localizedStringForKey:videoStr]];
+            
+        }else if (self.photoCount > 0) {
+            NSString *photoStr;
+            if (self.photoCount > 1) {
+                photoStr = @"Photos";
+            }else {
+                photoStr = @"Photo";
+            }
+            NSMutableAttributedString *atbStr = [[NSMutableAttributedString alloc] init];
+            NSAttributedString *photoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@",[NSBundle hx_localizedStringForKey:photoStr]] attributes:dict];
+            [atbStr appendAttributedString:photoCountStr];
+            [atbStr appendAttributedString:photoAtbStr];
+            
+            
+            self.titleLb.attributedText = atbStr;
+            //        self.titleLb.text = [NSString stringWithFormat:@"%ld %@",self.photoCount,[NSBundle hx_localizedStringForKey:photoStr]];
+        }else {
+            NSString *videoStr;
+            if (videoCount > 1) {
+                videoStr = @"Videos";
+            }else {
+                videoStr = @"Video";
+            }
+            NSMutableAttributedString *atbStr = [[NSMutableAttributedString alloc] init];
+            
+            NSAttributedString *videoAtbStr = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@",[NSBundle hx_localizedStringForKey:videoStr]] attributes:dict];
+            [atbStr appendAttributedString:videoCountStr];
+            [atbStr appendAttributedString:videoAtbStr];
+            
+            self.titleLb.attributedText = atbStr;
+            //        self.titleLb.text = [NSString stringWithFormat:@"%ld %@",videoCount, [NSBundle hx_localizedStringForKey:videoStr]];
         }
     }
-    
-    
-    [self.originalBtn setImage:originalNormalImage forState:UIControlStateNormal];
-    [self.originalBtn setImage:originalSelectedImage forState:UIControlStateSelected];
-    [self.editBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
-    [self.editBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-    if ([manager.configuration.themeColor isEqual:[UIColor whiteColor]]) {
-        [self.doneBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [self.doneBtn setTitleColor:[[UIColor blackColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+    - (void)layoutSubviews {
+        [super layoutSubviews];
+        self.titleLb.frame = CGRectMake(0, 0, self.hx_w, 50);
     }
-   
-    
-    if (manager.configuration.selectedTitleColor) {
-        [self.doneBtn setTitleColor:manager.configuration.selectedTitleColor forState:UIControlStateNormal];
-        [self.doneBtn setTitleColor:[manager.configuration.selectedTitleColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+    - (UILabel *)titleLb {
+        if (!_titleLb) {
+            _titleLb = [[UILabel alloc] init];
+            //        _titleLb.textColor = [UIColor blackColor];
+            _titleLb.textAlignment = NSTextAlignmentCenter;
+            //        _titleLb.font = [UIFont hx_helveticaNeueOfSize:15];
+        }
+        return _titleLb;
     }
+    @end
     
-    if (manager.configuration.isWXStyle) {
-        [self.doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [self.doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-        self.bgView.barTintColor = [UIColor blackColor];
+    @interface HXPhotoBottomView ()
+    @property (strong, nonatomic) UIButton *previewBtn;
+    @property (strong, nonatomic) UIButton *doneBtn;
+    @property (strong, nonatomic) UIButton *editBtn;
+    @end
+    
+    @implementation HXPhotoBottomView
+    - (instancetype)initWithFrame:(CGRect)frame {
+        self = [super initWithFrame:frame];
+        if (self) {
+            [self setupUI];
+        }
+        return self;
     }
-    
-    
-}
-- (void)setSelectCount:(NSInteger)selectCount {
-    _selectCount = selectCount;
-    if (selectCount <= 0) {
-        self.previewBtn.enabled = NO;
-        self.doneBtn.enabled = NO;
-        [self.doneBtn setTitle:[NSBundle hx_localizedStringForKey:@"完成"] forState:UIControlStateNormal];
-    }else {
-        self.previewBtn.enabled = YES;
-        self.doneBtn.enabled = YES;
-        if (self.manager.configuration.doneBtnShowDetail) {
-            if (!self.manager.configuration.selectTogether) {
-                if (self.manager.selectedPhotoCount > 0) {
-                    NSInteger maxCount = self.manager.configuration.photoMaxNum > 0 ? self.manager.configuration.photoMaxNum : self.manager.configuration.maxNum;
-                    [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount,maxCount] forState:UIControlStateNormal];
+    - (void)setupUI {
+        [self addSubview:self.bgView];
+        [self addSubview:self.previewBtn];
+        [self addSubview:self.originalBtn];
+        [self addSubview:self.doneBtn];
+        [self addSubview:self.editBtn];
+        [self changeDoneBtnFrame];
+    }
+    - (void)setManager:(HXPhotoManager *)manager {
+        _manager = manager;
+        self.originalBtn.hidden = manager.configuration.hideOriginalBtn;
+        if (manager.type == HXPhotoManagerSelectedTypePhoto) {
+            self.editBtn.hidden = !manager.configuration.photoCanEdit;
+        }else if (manager.type == HXPhotoManagerSelectedTypeVideo) {
+            self.originalBtn.hidden = YES;
+            self.editBtn.hidden = !manager.configuration.videoCanEdit;
+        }else {
+            if (!manager.configuration.videoCanEdit && !manager.configuration.photoCanEdit) {
+                self.editBtn.hidden = YES;
+            }
+        }
+        self.originalBtn.selected = manager.original;
+        
+        [self.previewBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
+        [self.previewBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+        self.doneBtn.backgroundColor = [manager.configuration.themeColor colorWithAlphaComponent:0.5];
+        [self.originalBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
+        [self.originalBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+        
+        UIImage *originalNormalImage = [[UIImage hx_imageNamed:manager.configuration.originalNormalImageName] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        UIImage *originalSelectedImage = [UIImage hx_imageNamed:manager.configuration.originalSelectedImageName] ;
+        
+        
+        if ([manager.configuration.originalNormalImageName isEqualToString:@"hx_original_normal"] &&
+            [manager.configuration.originalSelectedImageName isEqualToString:@"hx_original_selected"]) {
+            CGFloat red, green, blue, alpha;
+            [manager.configuration.themeColor getRed:&red green:&green blue:&blue alpha:&alpha];
+            BOOL sameColor = (red == 0) && (green == 0.47843137254901963) && (blue == 1) && (alpha == 1);
+            if (!sameColor) {
+                originalNormalImage = [originalNormalImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                originalSelectedImage = [originalSelectedImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                if (manager.configuration.isWXStyle) {
+                    self.originalBtn.imageView.tintColor = [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1];
+                }
+                else
+                {
+                    self.originalBtn.imageView.tintColor = manager.configuration.themeColor;
+                }
+                
+            }
+        }
+        
+        
+        [self.originalBtn setImage:originalNormalImage forState:UIControlStateNormal];
+        [self.originalBtn setImage:originalSelectedImage forState:UIControlStateSelected];
+        [self.editBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
+        [self.editBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+        if ([manager.configuration.themeColor isEqual:[UIColor whiteColor]]) {
+            [self.doneBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+            [self.doneBtn setTitleColor:[[UIColor blackColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+        }
+        
+        
+        if (manager.configuration.selectedTitleColor) {
+            [self.doneBtn setTitleColor:manager.configuration.selectedTitleColor forState:UIControlStateNormal];
+            [self.doneBtn setTitleColor:[manager.configuration.selectedTitleColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+        }
+        
+        if (manager.configuration.isWXStyle) {
+            [self.doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            [self.doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+            self.bgView.barTintColor = [UIColor blackColor];
+        }
+        
+        
+    }
+    - (void)setSelectCount:(NSInteger)selectCount {
+        _selectCount = selectCount;
+        if (selectCount <= 0) {
+            self.previewBtn.enabled = NO;
+            self.doneBtn.enabled = NO;
+            [self.doneBtn setTitle:[NSBundle hx_localizedStringForKey:@"完成"] forState:UIControlStateNormal];
+        }else {
+            self.previewBtn.enabled = YES;
+            self.doneBtn.enabled = YES;
+            if (self.manager.configuration.doneBtnShowDetail) {
+                if (!self.manager.configuration.selectTogether) {
+                    if (self.manager.selectedPhotoCount > 0) {
+                        NSInteger maxCount = self.manager.configuration.photoMaxNum > 0 ? self.manager.configuration.photoMaxNum : self.manager.configuration.maxNum;
+                        [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount,maxCount] forState:UIControlStateNormal];
+                    }else {
+                        NSInteger maxCount = self.manager.configuration.videoMaxNum > 0 ? self.manager.configuration.videoMaxNum : self.manager.configuration.maxNum;
+                        [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount,maxCount] forState:UIControlStateNormal];
+                    }
                 }else {
-                    NSInteger maxCount = self.manager.configuration.videoMaxNum > 0 ? self.manager.configuration.videoMaxNum : self.manager.configuration.maxNum;
-                    [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount,maxCount] forState:UIControlStateNormal];
+                    [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount,self.manager.configuration.maxNum] forState:UIControlStateNormal];
                 }
             }else {
-                [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld/%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount,self.manager.configuration.maxNum] forState:UIControlStateNormal];
+                [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount] forState:UIControlStateNormal];
             }
-        }else {
-            [self.doneBtn setTitle:[NSString stringWithFormat:@"%@(%ld)",[NSBundle hx_localizedStringForKey:@"完成"],selectCount] forState:UIControlStateNormal];
         }
-    }
-    
-    if (self.manager.configuration.isWXStyle) {
-        self.doneBtn.backgroundColor = self.doneBtn.enabled ?[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1]:[[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1] colorWithAlphaComponent:0.5];
-    }
-    else
-    {
-         self.doneBtn.backgroundColor = self.doneBtn.enabled ? self.manager.configuration.themeColor : [self.manager.configuration.themeColor colorWithAlphaComponent:0.5];
-    }
-    
-   
-    
-    if (!self.manager.configuration.selectTogether) {
-        if (self.manager.selectedPhotoArray.count) {
-            self.editBtn.enabled = self.manager.configuration.photoCanEdit;
-        }else if (self.manager.selectedVideoArray.count) {
-            self.editBtn.enabled = self.manager.configuration.videoCanEdit;
-        }else {
-            self.editBtn.enabled = NO;
+        
+        if (self.manager.configuration.isWXStyle) {
+            self.doneBtn.backgroundColor = self.doneBtn.enabled ?[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1]:[[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1] colorWithAlphaComponent:0.5];
         }
-    }else {
-        if (self.manager.selectedArray.count) {
-            HXPhotoModel *model = self.manager.selectedArray.firstObject;
-            if (model.subType == HXPhotoModelMediaSubTypePhoto) {
+        else
+        {
+            self.doneBtn.backgroundColor = self.doneBtn.enabled ? self.manager.configuration.themeColor : [self.manager.configuration.themeColor colorWithAlphaComponent:0.5];
+        }
+        
+        
+        
+        if (!self.manager.configuration.selectTogether) {
+            if (self.manager.selectedPhotoArray.count) {
                 self.editBtn.enabled = self.manager.configuration.photoCanEdit;
-            }else {
+            }else if (self.manager.selectedVideoArray.count) {
                 self.editBtn.enabled = self.manager.configuration.videoCanEdit;
+            }else {
+                self.editBtn.enabled = NO;
             }
         }else {
-            self.editBtn.enabled = NO;
+            if (self.manager.selectedArray.count) {
+                HXPhotoModel *model = self.manager.selectedArray.firstObject;
+                if (model.subType == HXPhotoModelMediaSubTypePhoto) {
+                    self.editBtn.enabled = self.manager.configuration.photoCanEdit;
+                }else {
+                    self.editBtn.enabled = self.manager.configuration.videoCanEdit;
+                }
+            }else {
+                self.editBtn.enabled = NO;
+            }
+        }
+        if (self.manager.selectedPhotoArray.count == 0) {
+            self.originalBtn.enabled = NO;
+            self.originalBtn.selected = NO;
+            [self.manager setOriginal:NO] ;
+        }else {
+            self.originalBtn.enabled = YES;
+        }
+        [self changeDoneBtnFrame];
+        [self requestPhotosBytes];
+    }
+    - (void)requestPhotosBytes {
+        if (!self.manager.configuration.showOriginalBytes) {
+            return;
+        }
+        if (self.originalBtn.selected) {
+            HXWeakSelf
+            [self.manager requestPhotosBytesWithCompletion:^(NSString *totalBytes, NSUInteger totalDataLengths) {
+                [weakSelf.originalBtn setTitle:[NSString stringWithFormat:@"%@(%@)",[NSBundle hx_localizedStringForKey:@"原图"], totalBytes] forState:UIControlStateNormal];
+                [weakSelf updateOriginalBtnFrame];
+            }];
+        }else {
+            [self.manager.dataOperationQueue cancelAllOperations];
+            [self.originalBtn setTitle:[NSBundle hx_localizedStringForKey:@"原图"] forState:UIControlStateNormal];
+            [self updateOriginalBtnFrame];
         }
     }
-    if (self.manager.selectedPhotoArray.count == 0) {
-        self.originalBtn.enabled = NO;
-        self.originalBtn.selected = NO;
-        [self.manager setOriginal:NO] ;
-    }else { 
-        self.originalBtn.enabled = YES;
+    - (void)changeDoneBtnFrame {
+        CGFloat width = self.doneBtn.titleLabel.hx_getTextWidth;
+        self.doneBtn.hx_w = width + 20;
+        if (self.doneBtn.hx_w < 50) {
+            self.doneBtn.hx_w = 50;
+        }
+        self.doneBtn.hx_x = self.hx_w - 12 - self.doneBtn.hx_w;
     }
-    [self changeDoneBtnFrame];
-    [self requestPhotosBytes];
-}
-- (void)requestPhotosBytes {
-    if (!self.manager.configuration.showOriginalBytes) { 
-        return;
+    - (void)updateOriginalBtnFrame {
+        if (self.editBtn.hidden) {
+            self.originalBtn.frame = CGRectMake(CGRectGetMaxX(self.previewBtn.frame) + 10, 0, 0 + 20, 50);
+            
+        }else {
+            self.originalBtn.frame = CGRectMake(CGRectGetMaxX(self.editBtn.frame) + 10, 0, 0 + 20, 50);
+        }
+        self.originalBtn.hx_w = self.originalBtn.titleLabel.hx_getTextWidth + 20;
+        if (CGRectGetMaxX(self.originalBtn.frame) > self.doneBtn.hx_x - 20) {
+            CGFloat w = self.doneBtn.hx_x - 5 - self.originalBtn.hx_x;
+            self.originalBtn.hx_w = w < 0 ? 20 : w;
+        }
+        
+        self.originalBtn.imageEdgeInsets = UIEdgeInsetsMake(0, self.originalBtn.hx_w - 20 , 0, 0);
     }
-    if (self.originalBtn.selected) {
-        HXWeakSelf
-        [self.manager requestPhotosBytesWithCompletion:^(NSString *totalBytes, NSUInteger totalDataLengths) {
-            [weakSelf.originalBtn setTitle:[NSString stringWithFormat:@"%@(%@)",[NSBundle hx_localizedStringForKey:@"原图"], totalBytes] forState:UIControlStateNormal];
-            [weakSelf updateOriginalBtnFrame];
-        }];
-    }else {
-        [self.manager.dataOperationQueue cancelAllOperations];
-        [self.originalBtn setTitle:[NSBundle hx_localizedStringForKey:@"原图"] forState:UIControlStateNormal];
+    - (void)didDoneBtnClick {
+        if ([self.delegate respondsToSelector:@selector(photoBottomViewDidDoneBtn)]) {
+            [self.delegate photoBottomViewDidDoneBtn];
+        }
+    }
+    - (void)didPreviewClick {
+        if ([self.delegate respondsToSelector:@selector(photoBottomViewDidPreviewBtn)]) {
+            [self.delegate photoBottomViewDidPreviewBtn];
+        }
+    }
+    - (void)didEditBtnClick {
+        if ([self.delegate respondsToSelector:@selector(photoBottomViewDidEditBtn)]) {
+            [self.delegate photoBottomViewDidEditBtn];
+        }
+    }
+    - (void)didOriginalClick:(UIButton *)button {
+        button.selected = !button.selected;
+        [self requestPhotosBytes];
+        [self.manager setOriginal:button.selected];
+    }
+    - (void)layoutSubviews {
+        [super layoutSubviews];
+        
+        self.bgView.frame = self.bounds;
+        self.previewBtn.frame = CGRectMake(12, 0, 0, 50);
+        self.previewBtn.hx_w = self.previewBtn.titleLabel.hx_getTextWidth;
+        self.previewBtn.center = CGPointMake(self.previewBtn.center.x, 25);
+        
+        self.editBtn.frame = CGRectMake(CGRectGetMaxX(self.previewBtn.frame) + 10, 0, 0, 50);
+        self.editBtn.hx_w = self.editBtn.titleLabel.hx_getTextWidth;
+        
+        self.doneBtn.frame = CGRectMake(0, 0, 50, 30);
+        self.doneBtn.center = CGPointMake(self.doneBtn.center.x, 25);
+        [self changeDoneBtnFrame];
+        
         [self updateOriginalBtnFrame];
     }
-}
-- (void)changeDoneBtnFrame {
-    CGFloat width = self.doneBtn.titleLabel.hx_getTextWidth;
-    self.doneBtn.hx_w = width + 20;
-    if (self.doneBtn.hx_w < 50) {
-        self.doneBtn.hx_w = 50;
+    - (UIToolbar *)bgView {
+        if (!_bgView) {
+            _bgView = [[UIToolbar alloc] init];
+            
+        }
+        return _bgView;
     }
-    self.doneBtn.hx_x = self.hx_w - 12 - self.doneBtn.hx_w;
-}
-- (void)updateOriginalBtnFrame {
-    if (self.editBtn.hidden) {
-        self.originalBtn.frame = CGRectMake(CGRectGetMaxX(self.previewBtn.frame) + 10, 0, 0 + 20, 50);
-        
-    }else {
-        self.originalBtn.frame = CGRectMake(CGRectGetMaxX(self.editBtn.frame) + 10, 0, 0 + 20, 50);
+    - (UIButton *)previewBtn {
+        if (!_previewBtn) {
+            _previewBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+            [_previewBtn setTitle:[NSBundle hx_localizedStringForKey:@"预览"] forState:UIControlStateNormal];
+            _previewBtn.titleLabel.font = [UIFont systemFontOfSize:16];
+            _previewBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+            [_previewBtn addTarget:self action:@selector(didPreviewClick) forControlEvents:UIControlEventTouchUpInside];
+            _previewBtn.enabled = NO;
+        }
+        return _previewBtn;
     }
-    self.originalBtn.hx_w = self.originalBtn.titleLabel.hx_getTextWidth + 20;
-    if (CGRectGetMaxX(self.originalBtn.frame) > self.doneBtn.hx_x - 20) {
-        CGFloat w = self.doneBtn.hx_x - 5 - self.originalBtn.hx_x;
-        self.originalBtn.hx_w = w < 0 ? 20 : w;
+    - (UIButton *)doneBtn {
+        if (!_doneBtn) {
+            _doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+            [_doneBtn setTitle:[NSBundle hx_localizedStringForKey:@"完成"] forState:UIControlStateNormal];
+            [_doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            [_doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+            //        _doneBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+            _doneBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+            _doneBtn.layer.cornerRadius = 3;
+            _doneBtn.enabled = NO;
+            [_doneBtn addTarget:self action:@selector(didDoneBtnClick) forControlEvents:UIControlEventTouchUpInside];
+        }
+        return _doneBtn;
     }
-    
-    self.originalBtn.imageEdgeInsets = UIEdgeInsetsMake(0, self.originalBtn.hx_w - 20 , 0, 0);
-}
-- (void)didDoneBtnClick {
-    if ([self.delegate respondsToSelector:@selector(photoBottomViewDidDoneBtn)]) {
-        [self.delegate photoBottomViewDidDoneBtn];
+    - (UIButton *)originalBtn {
+        if (!_originalBtn) {
+            _originalBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+            [_originalBtn setTitle:[NSBundle hx_localizedStringForKey:@"原图"] forState:UIControlStateNormal];
+            [_originalBtn addTarget:self action:@selector(didOriginalClick:) forControlEvents:UIControlEventTouchUpInside];
+            _originalBtn.titleLabel.font = [UIFont systemFontOfSize:16];
+            _originalBtn.imageEdgeInsets = UIEdgeInsetsMake(0, 35, 0, 0);
+            _originalBtn.titleEdgeInsets = UIEdgeInsetsMake(0, -15, 0, 0);
+            _originalBtn.enabled = NO;
+            _originalBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+        }
+        return _originalBtn;
     }
-}
-- (void)didPreviewClick {
-    if ([self.delegate respondsToSelector:@selector(photoBottomViewDidPreviewBtn)]) {
-        [self.delegate photoBottomViewDidPreviewBtn];
+    - (UIButton *)editBtn {
+        if (!_editBtn) {
+            _editBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+            [_editBtn setTitle:[NSBundle hx_localizedStringForKey:@"编辑"] forState:UIControlStateNormal];
+            _editBtn.titleLabel.font = [UIFont systemFontOfSize:16];
+            _editBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+            [_editBtn addTarget:self action:@selector(didEditBtnClick) forControlEvents:UIControlEventTouchUpInside];
+            _editBtn.enabled = NO;
+        }
+        return _editBtn;
     }
-}
-- (void)didEditBtnClick {
-    if ([self.delegate respondsToSelector:@selector(photoBottomViewDidEditBtn)]) {
-        [self.delegate photoBottomViewDidEditBtn];
-    }
-}
-- (void)didOriginalClick:(UIButton *)button {
-    button.selected = !button.selected;
-    [self requestPhotosBytes];
-    [self.manager setOriginal:button.selected]; 
-}
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    
-    self.bgView.frame = self.bounds;
-    self.previewBtn.frame = CGRectMake(12, 0, 0, 50);
-    self.previewBtn.hx_w = self.previewBtn.titleLabel.hx_getTextWidth;
-    self.previewBtn.center = CGPointMake(self.previewBtn.center.x, 25);
-    
-    self.editBtn.frame = CGRectMake(CGRectGetMaxX(self.previewBtn.frame) + 10, 0, 0, 50);
-    self.editBtn.hx_w = self.editBtn.titleLabel.hx_getTextWidth;
-    
-    self.doneBtn.frame = CGRectMake(0, 0, 50, 30);
-    self.doneBtn.center = CGPointMake(self.doneBtn.center.x, 25);
-    [self changeDoneBtnFrame];
-    
-    [self updateOriginalBtnFrame];
-}
-- (UIToolbar *)bgView {
-    if (!_bgView) {
-        _bgView = [[UIToolbar alloc] init];
-        
-    }
-    return _bgView;
-}
-- (UIButton *)previewBtn {
-    if (!_previewBtn) {
-        _previewBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_previewBtn setTitle:[NSBundle hx_localizedStringForKey:@"预览"] forState:UIControlStateNormal];
-        _previewBtn.titleLabel.font = [UIFont systemFontOfSize:16];
-        _previewBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-        [_previewBtn addTarget:self action:@selector(didPreviewClick) forControlEvents:UIControlEventTouchUpInside];
-        _previewBtn.enabled = NO;
-    }
-    return _previewBtn;
-}
-- (UIButton *)doneBtn {
-    if (!_doneBtn) {
-        _doneBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_doneBtn setTitle:[NSBundle hx_localizedStringForKey:@"完成"] forState:UIControlStateNormal];
-        [_doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [_doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-        //        _doneBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
-        _doneBtn.titleLabel.font = [UIFont systemFontOfSize:14];
-        _doneBtn.layer.cornerRadius = 3;
-        _doneBtn.enabled = NO;
-        [_doneBtn addTarget:self action:@selector(didDoneBtnClick) forControlEvents:UIControlEventTouchUpInside];
-    }
-    return _doneBtn;
-}
-- (UIButton *)originalBtn {
-    if (!_originalBtn) {
-        _originalBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_originalBtn setTitle:[NSBundle hx_localizedStringForKey:@"原图"] forState:UIControlStateNormal];
-        [_originalBtn addTarget:self action:@selector(didOriginalClick:) forControlEvents:UIControlEventTouchUpInside];
-        _originalBtn.titleLabel.font = [UIFont systemFontOfSize:16];
-        _originalBtn.imageEdgeInsets = UIEdgeInsetsMake(0, 35, 0, 0);
-        _originalBtn.titleEdgeInsets = UIEdgeInsetsMake(0, -15, 0, 0);
-        _originalBtn.enabled = NO;
-        _originalBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-    }
-    return _originalBtn;
-}
-- (UIButton *)editBtn {
-    if (!_editBtn) {
-        _editBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_editBtn setTitle:[NSBundle hx_localizedStringForKey:@"编辑"] forState:UIControlStateNormal];
-        _editBtn.titleLabel.font = [UIFont systemFontOfSize:16];
-        _editBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-        [_editBtn addTarget:self action:@selector(didEditBtnClick) forControlEvents:UIControlEventTouchUpInside];
-        _editBtn.enabled = NO;
-    }
-    return _editBtn;
-}
-@end
+    @end
