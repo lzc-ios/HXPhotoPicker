@@ -378,7 +378,14 @@ HXVideoEditViewControllerDelegate
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.selectBtn];
         self.selectBtn.selected = model.selected;
         [self.selectBtn setTitle:model.selectIndexStr forState:UIControlStateSelected];
-        self.selectBtn.backgroundColor = self.selectBtn.selected ? self.manager.configuration.themeColor : nil;
+        if (self.manager.configuration.isWXStyle) {
+             self.selectBtn.backgroundColor = self.selectBtn.selected ? [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1]:[[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1] colorWithAlphaComponent:0.5];
+        }
+        else
+        {
+             self.selectBtn.backgroundColor = self.selectBtn.selected ? self.manager.configuration.themeColor : nil;
+        }
+        
         if (self.manager.configuration.singleSelected) {
             self.selectBtn.hidden = YES;
             if (self.manager.configuration.singleJumpEdit) {
@@ -496,7 +503,14 @@ HXVideoEditViewControllerDelegate
         anim.values = @[@(1.2),@(0.8),@(1.1),@(0.9),@(1.0)];
         [button.layer addAnimation:anim forKey:@""];
     }
-    button.backgroundColor = button.selected ? self.manager.configuration.themeColor : nil;
+    if (self.manager.configuration.isWXStyle) {
+        button.backgroundColor = button.selected ? [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1]:[[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1] colorWithAlphaComponent:0.5];
+    }
+    else
+    {
+        button.backgroundColor = button.selected ? self.manager.configuration.themeColor : nil;
+    }
+    
     if ([self.delegate respondsToSelector:@selector(photoPreviewControllerDidSelect:model:)]) {
         [self.delegate photoPreviewControllerDidSelect:self model:model];
     }
@@ -507,6 +521,9 @@ HXVideoEditViewControllerDelegate
         [self.bottomView deleteModel:model];
     }
 }
+
+
+
 - (void)dismissClick {
     self.manager.selectPhotoing = NO;
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -715,7 +732,15 @@ HXVideoEditViewControllerDelegate
         }
         self.selectBtn.selected = model.selected;
         [self.selectBtn setTitle:model.selectIndexStr forState:UIControlStateSelected];
-        self.selectBtn.backgroundColor = self.selectBtn.selected ? self.manager.configuration.themeColor : nil;
+        if (self.manager.configuration.isWXStyle) {
+            self.selectBtn.backgroundColor = self.selectBtn.selected ? [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1] : [[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1] colorWithAlphaComponent:0.5];
+        }
+        else
+        {
+            self.selectBtn.backgroundColor = self.selectBtn.selected ? self.manager.configuration.themeColor : nil;
+        }
+        
+        
         if (self.outside) {
             if ([self.modelArray containsObject:model] && self.layoutSubviewsCompletion) {
                 self.bottomView.currentIndex = [self.modelArray indexOfObject:model];

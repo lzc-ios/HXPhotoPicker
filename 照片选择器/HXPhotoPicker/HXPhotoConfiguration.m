@@ -25,7 +25,12 @@
     self.openCamera = YES;
     self.lookLivePhoto = NO;
     self.lookGifPhoto = YES;
+    self.statusBarStyle = UIStatusBarStyleLightContent;
     self.selectTogether = NO;
+    self.isWXStyle = YES;//默认微信
+    self.themeColor = [UIColor whiteColor];
+    self.navBarBackgroudColor = [UIColor blackColor];
+    self.navigationTitleColor = [UIColor whiteColor];
     self.maxNum = 10;
     self.photoMaxNum = 9;
     self.videoMaxNum = 1;
@@ -92,6 +97,11 @@
 //    self.albumShowMode = HXPhotoAlbumShowModePopup;
     
     self.editVideoExportPresetName = AVAssetExportPresetHighestQuality;
+    
+    self.cellSelectedBgColor = [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1];//背景
+    self.selectedTitleColor = [UIColor whiteColor];//文字
+    
+    
 }
 - (void)setLanguageType:(HXPhotoLanguageType)languageType {
     if ([HXPhotoCommon photoCommon].languageType != languageType) {
@@ -113,12 +123,7 @@
         _clarityScale = clarityScale;
     }
 }
-- (UIColor *)themeColor {
-    if (!_themeColor) {
-        _themeColor = [UIColor colorWithRed:0 green:0.47843137254901963 blue:1 alpha:1]; 
-    }
-    return _themeColor;
-}
+
 - (NSString *)originalNormalImageName {
     if (!_originalNormalImageName) {
         _originalNormalImageName = @"hx_original_normal";

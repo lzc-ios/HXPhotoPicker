@@ -2353,7 +2353,7 @@ HXVideoEditViewControllerDelegate
 }
 - (void)setManager:(HXPhotoManager *)manager {
     _manager = manager;
-    self.originalBtn.hidden = self.manager.configuration.hideOriginalBtn;
+    self.originalBtn.hidden = manager.configuration.hideOriginalBtn;
     if (manager.type == HXPhotoManagerSelectedTypePhoto) {
         self.editBtn.hidden = !manager.configuration.photoCanEdit;
     }else if (manager.type == HXPhotoManagerSelectedTypeVideo) {
@@ -2364,43 +2364,60 @@ HXVideoEditViewControllerDelegate
             self.editBtn.hidden = YES;
         }
     }
-    self.originalBtn.selected = self.manager.original;
+    self.originalBtn.selected = manager.original;
     
-    [self.previewBtn setTitleColor:self.manager.configuration.themeColor forState:UIControlStateNormal];
-    [self.previewBtn setTitleColor:[self.manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-    self.doneBtn.backgroundColor = [self.manager.configuration.themeColor colorWithAlphaComponent:0.5];
-    [self.originalBtn setTitleColor:self.manager.configuration.themeColor forState:UIControlStateNormal];
-    [self.originalBtn setTitleColor:[self.manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+    [self.previewBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
+    [self.previewBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+    self.doneBtn.backgroundColor = [manager.configuration.themeColor colorWithAlphaComponent:0.5];
+    [self.originalBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
+    [self.originalBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
     
-    UIImage *originalNormalImage = [[UIImage hx_imageNamed:self.manager.configuration.originalNormalImageName] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    UIImage *originalSelectedImage = [UIImage hx_imageNamed:self.manager.configuration.originalSelectedImageName] ;
+    UIImage *originalNormalImage = [[UIImage hx_imageNamed:manager.configuration.originalNormalImageName] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    UIImage *originalSelectedImage = [UIImage hx_imageNamed:manager.configuration.originalSelectedImageName] ;
     
     
-    if ([self.manager.configuration.originalNormalImageName isEqualToString:@"hx_original_normal"] &&
-        [self.manager.configuration.originalSelectedImageName isEqualToString:@"hx_original_selected"]) {
+    if ([manager.configuration.originalNormalImageName isEqualToString:@"hx_original_normal"] &&
+        [manager.configuration.originalSelectedImageName isEqualToString:@"hx_original_selected"]) {
         CGFloat red, green, blue, alpha;
-        [self.manager.configuration.themeColor getRed:&red green:&green blue:&blue alpha:&alpha];
+        [manager.configuration.themeColor getRed:&red green:&green blue:&blue alpha:&alpha];
         BOOL sameColor = (red == 0) && (green == 0.47843137254901963) && (blue == 1) && (alpha == 1);
         if (!sameColor) {
             originalNormalImage = [originalNormalImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             originalSelectedImage = [originalSelectedImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-            self.originalBtn.imageView.tintColor = self.manager.configuration.themeColor;
+            if (manager.configuration.isWXStyle) {
+                self.originalBtn.imageView.tintColor = [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1];
+            }
+            else
+            {
+                self.originalBtn.imageView.tintColor = manager.configuration.themeColor;
+            }
+            
         }
     }
     
     
     [self.originalBtn setImage:originalNormalImage forState:UIControlStateNormal];
     [self.originalBtn setImage:originalSelectedImage forState:UIControlStateSelected];
-    [self.editBtn setTitleColor:self.manager.configuration.themeColor forState:UIControlStateNormal];
-    [self.editBtn setTitleColor:[self.manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
-    if ([self.manager.configuration.themeColor isEqual:[UIColor whiteColor]]) {
+    [self.editBtn setTitleColor:manager.configuration.themeColor forState:UIControlStateNormal];
+    [self.editBtn setTitleColor:[manager.configuration.themeColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+    if ([manager.configuration.themeColor isEqual:[UIColor whiteColor]]) {
         [self.doneBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [self.doneBtn setTitleColor:[[UIColor blackColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
     }
-    if (self.manager.configuration.selectedTitleColor) {
-        [self.doneBtn setTitleColor:self.manager.configuration.selectedTitleColor forState:UIControlStateNormal];
-        [self.doneBtn setTitleColor:[self.manager.configuration.selectedTitleColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+   
+    
+    if (manager.configuration.selectedTitleColor) {
+        [self.doneBtn setTitleColor:manager.configuration.selectedTitleColor forState:UIControlStateNormal];
+        [self.doneBtn setTitleColor:[manager.configuration.selectedTitleColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
     }
+    
+    if (manager.configuration.isWXStyle) {
+        [self.doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [self.doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+        self.bgView.barTintColor = [UIColor blackColor];
+    }
+    
+    
 }
 - (void)setSelectCount:(NSInteger)selectCount {
     _selectCount = selectCount;
@@ -2428,7 +2445,15 @@ HXVideoEditViewControllerDelegate
         }
     }
     
-    self.doneBtn.backgroundColor = self.doneBtn.enabled ? self.manager.configuration.themeColor : [self.manager.configuration.themeColor colorWithAlphaComponent:0.5];
+    if (self.manager.configuration.isWXStyle) {
+        self.doneBtn.backgroundColor = self.doneBtn.enabled ?[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1]:[[UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1] colorWithAlphaComponent:0.5];
+    }
+    else
+    {
+         self.doneBtn.backgroundColor = self.doneBtn.enabled ? self.manager.configuration.themeColor : [self.manager.configuration.themeColor colorWithAlphaComponent:0.5];
+    }
+    
+   
     
     if (!self.manager.configuration.selectTogether) {
         if (self.manager.selectedPhotoArray.count) {
@@ -2539,6 +2564,7 @@ HXVideoEditViewControllerDelegate
 - (UIToolbar *)bgView {
     if (!_bgView) {
         _bgView = [[UIToolbar alloc] init];
+        
     }
     return _bgView;
 }

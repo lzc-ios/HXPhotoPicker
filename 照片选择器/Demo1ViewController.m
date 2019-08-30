@@ -56,6 +56,9 @@
         _manager.configuration.saveSystemAblum = YES;
         _manager.configuration.selectTogether = YES;
         _manager.configuration.creationDateSort = YES;
+//       _manager.configuration.cellSelectedBgColor = [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1];//背景
+//       _manager.configuration.selectedTitleColor = [UIColor whiteColor];//文字
+   
 //        _manager.configuration.supportRotation = NO;
 //        _manager.configuration.cameraCellShowPreview = NO;
 //        _manager.configuration.themeColor = [UIColor redColor];
@@ -68,16 +71,16 @@
 //        _manager.configuration.sectionHeaderSuspensionBgColor = [UIColor redColor];
 //        _manager.configuration.sectionHeaderSuspensionTitleColor = [UIColor whiteColor];
 //        _manager.configuration.statusBarStyle = UIStatusBarStyleLightContent;
-//        _manager.configuration.selectedTitleColor = [UIColor redColor];
+       // _manager.configuration.selectedTitleColor = [UIColor redColor];
         
 //        _manager.configuration.requestImageAfterFinishingSelection = YES;
         
         __weak typeof(self) weakSelf = self;
         _manager.configuration.photoListBottomView = ^(HXPhotoBottomView *bottomView) {
-            bottomView.bgView.barTintColor = weakSelf.bottomViewBgColor;
+          
         };
         _manager.configuration.previewBottomView = ^(HXPhotoPreviewBottomView *bottomView) {
-            bottomView.bgView.barTintColor = weakSelf.bottomViewBgColor;
+           
         };
         _manager.configuration.albumListCollectionView = ^(UICollectionView *collectionView) {
 //            NSSLog(@"albumList:%@",collectionView);
@@ -88,44 +91,9 @@
         _manager.configuration.previewCollectionView = ^(UICollectionView *collectionView) {
 //            NSSLog(@"preview:%@",collectionView);
         };
-//        _manager.configuration.movableCropBox = YES;
-//        _manager.configuration.movableCropBoxEditSize = YES;
-//        _manager.configuration.movableCropBoxCustomRatio = CGPointMake(1, 1);
+
         
-        // 使用自动的相机  这里拿系统相机做示例 
-        _manager.configuration.shouldUseCamera = ^(UIViewController *viewController, HXPhotoConfigurationCameraType cameraType, HXPhotoManager *manager) {
-            
-            // 这里拿使用系统相机做例子
-            UIImagePickerController *imagePickerController = [[UIImagePickerController alloc] init];
-            imagePickerController.delegate = (id)weakSelf;
-            imagePickerController.allowsEditing = NO;
-            NSString *requiredMediaTypeImage = ( NSString *)kUTTypeImage;
-            NSString *requiredMediaTypeMovie = ( NSString *)kUTTypeMovie;
-            NSArray *arrMediaTypes;
-            if (cameraType == HXPhotoConfigurationCameraTypePhoto) {
-                arrMediaTypes=[NSArray arrayWithObjects:requiredMediaTypeImage,nil];
-            }else if (cameraType == HXPhotoConfigurationCameraTypeVideo) {
-                arrMediaTypes=[NSArray arrayWithObjects:requiredMediaTypeMovie,nil];
-            }else {
-                arrMediaTypes=[NSArray arrayWithObjects:requiredMediaTypeImage, requiredMediaTypeMovie,nil];
-            }
-            [imagePickerController setMediaTypes:arrMediaTypes];
-            // 设置录制视频的质量
-            [imagePickerController setVideoQuality:UIImagePickerControllerQualityTypeHigh];
-            //设置最长摄像时间
-            [imagePickerController setVideoMaximumDuration:60.f];
-            imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-            imagePickerController.navigationController.navigationBar.tintColor = [UIColor whiteColor];
-            imagePickerController.modalPresentationStyle=UIModalPresentationOverCurrentContext;
-            [viewController presentViewController:imagePickerController animated:YES completion:nil];
-        };
-//        _manager.shouldSelectModel = ^NSString *(HXPhotoModel *model) {
-//            // 如果return nil 则会走默认的判断是否达到最大值
-//            //return nil;
-//            return @"Demo1 116 - 120 行注释掉就能选啦~\(≧▽≦)/~";
-//        };
-        _manager.configuration.videoCanEdit = NO;
-        _manager.configuration.photoCanEdit = NO;
+
     }
     return _manager;
 }
@@ -205,114 +173,7 @@
     self.original.text = @"NO";
 }
 - (IBAction)goAlbum:(id)sender {
-    self.manager.configuration.clarityScale = self.clarityText.text.floatValue;
-    if (self.tintColor.selectedSegmentIndex == 0) {
-        self.manager.configuration.themeColor = self.view.tintColor;
-        self.manager.configuration.cellSelectedTitleColor = nil;
-    }else if (self.tintColor.selectedSegmentIndex == 1) {
-        self.manager.configuration.themeColor = [UIColor redColor];
-        self.manager.configuration.cellSelectedTitleColor = [UIColor redColor];
-    }else if (self.tintColor.selectedSegmentIndex == 2) {
-        self.manager.configuration.themeColor = [UIColor whiteColor];
-        self.manager.configuration.cellSelectedTitleColor = [UIColor whiteColor];
-    }else if (self.tintColor.selectedSegmentIndex == 3) {
-        self.manager.configuration.themeColor = [UIColor blackColor];
-        self.manager.configuration.cellSelectedTitleColor = [UIColor blackColor];
-    }else if (self.tintColor.selectedSegmentIndex == 4) {
-        self.manager.configuration.themeColor = [UIColor orangeColor];
-        self.manager.configuration.cellSelectedTitleColor = [UIColor orangeColor];
-    }else {
-        self.manager.configuration.themeColor = self.view.tintColor;
-        self.manager.configuration.cellSelectedTitleColor = nil;
-    }
-    
-    if (self.navBgColor.selectedSegmentIndex == 0) {
-        self.manager.configuration.navBarBackgroudColor = nil;
-        self.manager.configuration.statusBarStyle = UIStatusBarStyleDefault;
-        self.manager.configuration.sectionHeaderTranslucent = YES;
-        self.bottomViewBgColor = nil;
-        self.manager.configuration.cellSelectedBgColor = nil;
-        self.manager.configuration.selectedTitleColor = nil;
-        self.manager.configuration.sectionHeaderSuspensionBgColor = nil;
-        self.manager.configuration.sectionHeaderSuspensionTitleColor = nil;
-    }else if (self.navBgColor.selectedSegmentIndex == 1) {
-        self.manager.configuration.navBarBackgroudColor = [UIColor redColor];
-        self.manager.configuration.statusBarStyle = UIStatusBarStyleLightContent;
-        self.manager.configuration.sectionHeaderTranslucent = NO;
-        self.bottomViewBgColor = [UIColor redColor];
-        self.manager.configuration.cellSelectedBgColor = [UIColor redColor];
-        self.manager.configuration.selectedTitleColor = [UIColor redColor];
-        self.manager.configuration.sectionHeaderSuspensionBgColor = [UIColor redColor];
-        self.manager.configuration.sectionHeaderSuspensionTitleColor = [UIColor whiteColor];
-    }else if (self.navBgColor.selectedSegmentIndex == 2) {
-        self.manager.configuration.navBarBackgroudColor = [UIColor whiteColor];
-        self.manager.configuration.statusBarStyle = UIStatusBarStyleDefault;
-        self.manager.configuration.sectionHeaderTranslucent = NO;
-        self.bottomViewBgColor = [UIColor whiteColor];
-        self.manager.configuration.cellSelectedBgColor = self.manager.configuration.themeColor;
-        self.manager.configuration.cellSelectedTitleColor = [UIColor whiteColor];
-        self.manager.configuration.selectedTitleColor = [UIColor whiteColor];
-        self.manager.configuration.sectionHeaderSuspensionBgColor = [UIColor whiteColor];
-        self.manager.configuration.sectionHeaderSuspensionTitleColor = [UIColor blackColor];
-    }else if (self.navBgColor.selectedSegmentIndex == 3) {
-        self.manager.configuration.navBarBackgroudColor = [UIColor blackColor];
-        self.manager.configuration.statusBarStyle = UIStatusBarStyleLightContent;
-        self.manager.configuration.sectionHeaderTranslucent = NO;
-        self.bottomViewBgColor = [UIColor blackColor];
-        self.manager.configuration.cellSelectedBgColor = [UIColor blackColor];
-        self.manager.configuration.selectedTitleColor = [UIColor blackColor];
-        self.manager.configuration.sectionHeaderSuspensionBgColor = [UIColor blackColor];
-        self.manager.configuration.sectionHeaderSuspensionTitleColor = [UIColor whiteColor];
-    }else if (self.navBgColor.selectedSegmentIndex == 4) {
-        self.manager.configuration.navBarBackgroudColor = [UIColor orangeColor];
-        self.manager.configuration.statusBarStyle = UIStatusBarStyleLightContent;
-        self.manager.configuration.sectionHeaderTranslucent = NO;
-        self.bottomViewBgColor = [UIColor orangeColor];
-        self.manager.configuration.cellSelectedBgColor = [UIColor orangeColor];
-        self.manager.configuration.selectedTitleColor = [UIColor orangeColor];
-        self.manager.configuration.sectionHeaderSuspensionBgColor = [UIColor orangeColor];
-        self.manager.configuration.sectionHeaderSuspensionTitleColor = [UIColor whiteColor];
-    }else {
-        self.manager.configuration.navBarBackgroudColor = nil;
-        self.manager.configuration.statusBarStyle = UIStatusBarStyleDefault;
-        self.manager.configuration.sectionHeaderTranslucent = YES;
-        self.bottomViewBgColor = nil;
-        self.manager.configuration.cellSelectedBgColor = nil;
-        self.manager.configuration.selectedTitleColor = nil;
-        self.manager.configuration.sectionHeaderSuspensionBgColor = nil;
-        self.manager.configuration.sectionHeaderSuspensionTitleColor = nil;
-    }
-    
-    if (self.navTitleColor.selectedSegmentIndex == 0) {
-        self.manager.configuration.navigationTitleColor = nil;
-    }else if (self.navTitleColor.selectedSegmentIndex == 1) {
-        self.manager.configuration.navigationTitleColor = [UIColor redColor];
-    }else if (self.navTitleColor.selectedSegmentIndex == 2) {
-        self.manager.configuration.navigationTitleColor = [UIColor whiteColor];
-    }else if (self.navTitleColor.selectedSegmentIndex == 3) {
-        self.manager.configuration.navigationTitleColor = [UIColor blackColor];
-    }else if (self.navTitleColor.selectedSegmentIndex == 4) {
-        self.manager.configuration.navigationTitleColor = [UIColor orangeColor];
-    }else {
-        self.manager.configuration.navigationTitleColor = nil;
-    }
-    self.manager.configuration.hideOriginalBtn = self.hideOriginal.on;
-    self.manager.configuration.filtrationICloudAsset = self.icloudSwitch.on;
-    self.manager.configuration.photoMaxNum = self.photoText.text.integerValue;
-    self.manager.configuration.videoMaxNum = self.videoText.text.integerValue;
-    self.manager.configuration.maxNum = self.totalText.text.integerValue;
-    self.manager.configuration.rowCount = self.columnText.text.integerValue;
-    self.manager.configuration.downloadICloudAsset = self.downloadICloudAsset.on;
-    self.manager.configuration.saveSystemAblum = self.saveAblum.on;
-    self.manager.configuration.showDateSectionHeader = self.showHeaderSection.on;
-    self.manager.configuration.reverseDate = self.reverse.on;
-    self.manager.configuration.navigationTitleSynchColor = self.synchTitleColor.on;
-    self.manager.configuration.replaceCameraViewController = self.useCustomCamera.on;
-    self.manager.configuration.openCamera = self.addCamera.on;
-    self.manager.configuration.albumShowMode = self.albumShowModeSwitch.selectedSegmentIndex;
-    self.manager.configuration.photoCanEdit = self.photoCanEditSwitch.on;
-    self.manager.configuration.videoCanEdit = self.videoCanEditSwitch.on;
-    self.manager.configuration.creationDateSort = self.createTimeSortSwitch.on;
+   
     HXWeakSelf
     [self hx_presentSelectPhotoControllerWithManager:self.manager didDone:^(NSArray<HXPhotoModel *> *allList, NSArray<HXPhotoModel *> *photoList, NSArray<HXPhotoModel *> *videoList, BOOL isOriginal, UIViewController *viewController, HXPhotoManager *manager) {
         weakSelf.total.text = [NSString stringWithFormat:@"总数量：%ld   ( 照片：%ld   视频：%ld )",allList.count, photoList.count, videoList.count];

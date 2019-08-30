@@ -197,15 +197,24 @@ static const CGFloat kPhotoViewMargin = 12.0;
 - (void)lf_PhotoEditingController:(LFPhotoEditingController *)photoEditingVC didFinishPhotoEdit:(LFPhotoEdit *)photoEdit {
     [photoEditingVC.navigationController setNavigationBarHidden:NO];
     
-    HXPhotoModel *model = [HXPhotoModel photoModelWithImage:photoEdit.editPreviewImage];
+    HXPhotoModel *model= [HXPhotoModel photoModelWithImage:photoEdit.editPreviewImage];
     model.tempAsset = photoEdit;
+  
     if (photoEditingVC.navigationController.viewControllers.count > 1) {
         [photoEditingVC.navigationController popViewControllerAnimated:NO];
     }else {
         [photoEditingVC dismissViewControllerAnimated:NO completion:nil];
     }
+    if (!photoEdit) {
+        return ;
+    }
+    else
+    {
+        self.manager.configuration.usePhotoEditComplete(self.beforePhotoModel, model);
+    }
     
-    self.manager.configuration.usePhotoEditComplete(self.beforePhotoModel, model);
+    
+    
 }
 
 - (void)lf_PhotoEditingController:(LFPhotoEditingController *)photoEditingVC didCancelPhotoEdit:(LFPhotoEdit *)photoEdit {
@@ -230,15 +239,23 @@ static const CGFloat kPhotoViewMargin = 12.0;
 - (void)lf_VideoEditingController:(LFVideoEditingController *)videoEditingVC didFinishPhotoEdit:(LFVideoEdit *)videoEdit {
     [videoEditingVC.navigationController setNavigationBarHidden:NO];
     
+    if (!videoEdit) {
+        if (videoEditingVC.navigationController.viewControllers.count > 1) {
+            [videoEditingVC.navigationController popViewControllerAnimated:NO];
+        }else {
+            [videoEditingVC dismissViewControllerAnimated:NO completion:nil];
+        }
+        return;
+    }
+    
+    
     HXPhotoModel *model = [HXPhotoModel photoModelWithVideoURL:videoEdit.editFinalURL];
     model.tempAsset = videoEdit;
-    
     if (videoEditingVC.navigationController.viewControllers.count > 1) {
         [videoEditingVC.navigationController popViewControllerAnimated:NO];
     }else {
         [videoEditingVC dismissViewControllerAnimated:NO completion:nil];
     }
-    
     self.manager.configuration.useVideoEditComplete(self.beforeVideoModel, model);
 }
 - (void)dealloc {

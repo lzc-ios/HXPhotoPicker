@@ -312,6 +312,9 @@ HXPhotoPreviewViewController;
  选中时数字的颜色
  */
 @property (strong, nonatomic) UIColor *selectedTitleColor;
+/**默认微信样式  */
+@property(nonatomic,assign) BOOL  isWXStyle;
+
 
 /**
  sectionHeader悬浮时的标题颜色 ios9以上才有效果

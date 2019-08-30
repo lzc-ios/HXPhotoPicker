@@ -236,6 +236,10 @@
 - (UIToolbar *)bgView {
     if (!_bgView) {
         _bgView = [[UIToolbar alloc] init];
+        if (self.manager.configuration.isWXStyle) {
+             _bgView.barTintColor = [UIColor blackColor];
+        }
+      
     }
     return _bgView;
 }
@@ -244,6 +248,9 @@
         _tipView = [[UIToolbar alloc] init];
         _tipView.hidden = YES;
         [_tipView addSubview:self.tipLb];
+        if (self.manager.configuration.isWXStyle) {
+            _tipView.barTintColor = [UIColor blackColor];
+        }
     }
     return _tipView;
 }
@@ -251,7 +258,7 @@
     if (!_tipLb) {
         _tipLb = [[UILabel alloc] init];
         _tipLb.numberOfLines = 0;
-        _tipLb.textColor = self.manager.configuration.themeColor;
+        _tipLb.textColor = self.manager.configuration.isWXStyle?[UIColor whiteColor]:self.manager.configuration.themeColor;
         _tipLb.font = [UIFont systemFontOfSize:14];
     }
     return _tipLb;
@@ -296,9 +303,21 @@
             [_doneBtn setTitleColor:self.manager.configuration.selectedTitleColor forState:UIControlStateNormal];
             [_doneBtn setTitleColor:[self.manager.configuration.selectedTitleColor colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
         }
+        
+        if (self.manager.configuration.isWXStyle) {
+            [_doneBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            [_doneBtn setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.5] forState:UIControlStateDisabled];
+            _doneBtn.backgroundColor = [UIColor colorWithRed:80/255.0 green:169/255.0 blue:56/255.0 alpha:1];
+        }
+        else
+        {
+            _doneBtn.backgroundColor = self.manager.configuration.themeColor;
+        }
+        
+        
         _doneBtn.titleLabel.font = [UIFont systemFontOfSize:14];
         _doneBtn.layer.cornerRadius = 3;
-        _doneBtn.backgroundColor = self.manager.configuration.themeColor;
+        
         [_doneBtn addTarget:self action:@selector(didDoneBtnClick) forControlEvents:UIControlEventTouchUpInside];
     }
     return _doneBtn;

@@ -198,11 +198,11 @@
 //        [manager preloadData];
 //    }
     manager.configuration.specialModeNeedHideVideoSelectBtn = YES;
-    if (self.manager.afterSelectedArray.count > 0) {
+    if (manager.afterSelectedArray.count > 0) {
         if ([self.delegate respondsToSelector:@selector(photoListViewControllerDidDone:allList:photos:videos:original:)]) {
-            [self.delegate photoListViewControllerDidDone:self allList:self.manager.afterSelectedArray.copy photos:self.manager.afterSelectedPhotoArray.copy videos:self.manager.afterSelectedVideoArray.copy original:self.manager.afterOriginal];
+            [self.delegate photoListViewControllerDidDone:self allList:manager.afterSelectedArray.copy photos:manager.afterSelectedPhotoArray.copy videos:manager.afterSelectedVideoArray.copy original:manager.afterOriginal];
         }
-        [self setupDataWithAllList:self.manager.afterSelectedArray.copy photos:self.manager.afterSelectedPhotoArray.copy videos:self.manager.afterSelectedVideoArray.copy original:self.manager.afterOriginal];
+        [self setupDataWithAllList:manager.afterSelectedArray.copy photos:manager.afterSelectedPhotoArray.copy videos:manager.afterSelectedVideoArray.copy original:manager.afterOriginal];
     }
 }
 
